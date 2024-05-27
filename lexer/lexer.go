@@ -60,16 +60,17 @@ const (
 	FLOAT      = "FLOAT"
 	IDENTIFIER = "IDENTIFIER"
 
-	ARROW = "ARROW"
-
-	LEFT_PARENTHESIS  = "LEFT_PARENTHESIS"
-	RIGHT_PARENTHESIS = "RIGHT_PARENTHESIS"
-
-	LEFT_CURLY_BRACKET  = "LEFT_CURLY_BRACKET"
-	RIGHT_CURLY_BRACKET = "RIGHT_CURLY_BRACKET"
-
+	ARROW                = "ARROW"
+	LEFT_PARENTHESIS     = "LEFT_PARENTHESIS"
+	RIGHT_PARENTHESIS    = "RIGHT_PARENTHESIS"
+	LEFT_CURLY_BRACKET   = "LEFT_CURLY_BRACKET"
+	RIGHT_CURLY_BRACKET  = "RIGHT_CURLY_BRACKET"
 	LEFT_SQUARE_BRACKET  = "LEFT_SQUARE_BRACKET"
 	RIGHT_SQUARE_BRACKET = "RIGHT_SQUARE_BRACKET"
+
+	COMMA     = "COMMA"
+	SEMICOLON = "SEMICOLON"
+	COLON     = "COLON"
 )
 
 type Position struct {
@@ -197,6 +198,12 @@ func (l *Lexer) NextToken() *Token {
 			return tokenFromLexer(LEFT_SQUARE_BRACKET, startPos, string(r))
 		case ']':
 			return tokenFromLexer(RIGHT_SQUARE_BRACKET, startPos, string(r))
+		case ',':
+			return tokenFromLexer(COMMA, startPos, string(r))
+		case ';':
+			return tokenFromLexer(SEMICOLON, startPos, string(r))
+		case ':':
+			return tokenFromLexer(COLON, startPos, string(r))
 
 		case '+':
 			nextR, _, err := l.reader.ReadRune()

@@ -1,1 +1,1 @@
-func main() => println(f"hello world !")
+fn main() => println(f"hello world !")
