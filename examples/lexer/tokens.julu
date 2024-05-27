@@ -92,3 +92,25 @@ f"test"
 x, y = 1, 2
 ;
 :
+
+
+is
+and
+or
+not
+
+1 is 1
+1 is not 1
+
+1 not in 1
+
+a = []
+b = {:}
+b = {}
+c = ()
+
+true
+false
+if
+else
+return

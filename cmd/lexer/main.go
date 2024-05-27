@@ -11,7 +11,7 @@ import (
 func main() {
 	l := lexer.New(bufio.NewReader(os.Stdin))
 	for {
-		t := l.NextToken()
+		t := l.Lex()
 		if t.Type == lexer.EOF {
 			break
 		}

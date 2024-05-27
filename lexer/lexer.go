@@ -72,7 +72,43 @@ const (
 	SEMICOLON = "SEMICOLON"
 	COLON     = "COLON"
 	DOT       = "DOT"
+
+	IS = "IS"
+	IN = "IN"
+
+	// Keywords
+	TRUE  = "TRUE"
+	FALSE = "FALSE"
+
+	// Control flow
+	IF     = "IF"
+	ELSE   = "ELSE"
+	RETURN = "RETURN"
+
+	FN = "FN"
 )
+
+var keywords = map[string]TokenType{
+	"is":  IS,
+	"in":  IN,
+	"and": LOGICAL_AND,
+	"or":  LOGICAL_OR,
+	"not": LOGICAL_NOT,
+
+	"true":   TRUE,
+	"false":  FALSE,
+	"if":     IF,
+	"else":   ELSE,
+	"return": RETURN,
+	"fn":     FN,
+}
+
+func LookupIdent(ident string) TokenType {
+	if tok, ok := keywords[ident]; ok {
+		return tok
+	}
+	return IDENTIFIER
+}
 
 type Position struct {
 	line   int
@@ -166,7 +202,7 @@ func New(reader *bufio.Reader) *Lexer {
 	}
 }
 
-func (l *Lexer) NextToken() *Token {
+func (l *Lexer) Lex() *Token {
 	for {
 		r, _, err := l.reader.ReadRune()
 		if err != nil {
@@ -418,10 +454,10 @@ func (l *Lexer) NextToken() *Token {
 			} else if unicode.IsLetter(r) {
 				l.backup()
 				tokenType, lit := l.lexIdentifier()
-
-				// XXX - check here later if identifier is a keyword
-
-				return tokenFromLexer(tokenType, startPos, lit)
+				if tokenType != IDENTIFIER {
+					return tokenFromLexer(ILLEGAL, startPos, lit)
+				}
+				return tokenFromLexer(LookupIdent(lit), startPos, lit)
 			}
 
 			return tokenFromLexer(ILLEGAL, startPos, string(r))
