@@ -1,3 +1,3 @@
 module github.com/poolpOrg/julu
 
-go 1.23
+go 1.22.2
