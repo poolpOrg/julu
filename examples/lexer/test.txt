@@ -1,0 +1,86 @@
++
+-
+*
+/
+%
+++
+--
+
+<
+>
+<=
+>=
+==
+!=
+
+&
+|
+^
+~
+<<
+<<<
+>>
+>>>
+
+=
++=
+-=
+*=
+/=
+%=
+
+&=
+|=
+^=
+<<=
+>>=
+
+&&
+||
+!
+
+1
+10
+
+a
+abcdef
+
+1_000_000
+
+# single line comment
+
+// single line comment
+
+1 /* test */ 2
+
+1
+/*
+    a
+        multiline
+            comment
+            */
+
+3
+
+1.2
+
+0x10
+0o10
+0b10
+
+0x1.0x2
+
+`abcdef`
+`abc\tdef`
+`abc
+ def
+ `
+
+"abcdef"
+"abcdef"
+"abc
+ def"
+
+'a'
+
+f"test"
