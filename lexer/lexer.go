@@ -59,6 +59,17 @@ const (
 	INTEGER    = "INTEGER"
 	FLOAT      = "FLOAT"
 	IDENTIFIER = "IDENTIFIER"
+
+	ARROW = "ARROW"
+
+	LEFT_PARENTHESIS  = "LEFT_PARENTHESIS"
+	RIGHT_PARENTHESIS = "RIGHT_PARENTHESIS"
+
+	LEFT_CURLY_BRACKET  = "LEFT_CURLY_BRACKET"
+	RIGHT_CURLY_BRACKET = "RIGHT_CURLY_BRACKET"
+
+	LEFT_SQUARE_BRACKET  = "LEFT_SQUARE_BRACKET"
+	RIGHT_SQUARE_BRACKET = "RIGHT_SQUARE_BRACKET"
 )
 
 type Position struct {
@@ -174,6 +185,19 @@ func (l *Lexer) NextToken() *Token {
 		case '#':
 			l.skipLine()
 
+		case '(':
+			return tokenFromLexer(LEFT_PARENTHESIS, startPos, string(r))
+		case ')':
+			return tokenFromLexer(RIGHT_PARENTHESIS, startPos, string(r))
+		case '{':
+			return tokenFromLexer(LEFT_CURLY_BRACKET, startPos, string(r))
+		case '}':
+			return tokenFromLexer(RIGHT_CURLY_BRACKET, startPos, string(r))
+		case '[':
+			return tokenFromLexer(LEFT_SQUARE_BRACKET, startPos, string(r))
+		case ']':
+			return tokenFromLexer(RIGHT_SQUARE_BRACKET, startPos, string(r))
+
 		case '+':
 			nextR, _, err := l.reader.ReadRune()
 			if err == nil {
@@ -245,6 +269,8 @@ func (l *Lexer) NextToken() *Token {
 				l.pos.column++
 				if nextR == '=' {
 					return tokenFromLexer(EQUALS, startPos, "==")
+				} else if nextR == '>' {
+					return tokenFromLexer(ARROW, startPos, "=>")
 				}
 				l.backup()
 			}

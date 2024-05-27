@@ -15,6 +15,7 @@ func main() {
 		if t.Type == lexer.EOF {
 			break
 		}
-		fmt.Println(t.Type, t.Position(), t.Literal)
+		fmt.Printf("[%d:%d] %s (\"%s\")\n",
+			t.Position().Line(), t.Position().Column(), t.Type, t.Literal)
 	}
 }
