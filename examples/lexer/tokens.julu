@@ -77,9 +77,8 @@ abcdef
  `
 
 "abcdef"
-"abcdef"
-"abc
- def"
+"abc\tdef"
+"abc\ndef"
 
 'a'
 
