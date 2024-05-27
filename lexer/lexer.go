@@ -71,6 +71,7 @@ const (
 	COMMA     = "COMMA"
 	SEMICOLON = "SEMICOLON"
 	COLON     = "COLON"
+	DOT	  = "DOT"
 )
 
 type Position struct {
@@ -185,6 +186,15 @@ func (l *Lexer) NextToken() *Token {
 
 		case '#':
 			l.skipLine()
+
+		case ',':
+			return tokenFromLexer(COMMA, startPos, string(r))
+		case ';':
+			return tokenFromLexer(SEMICOLON, startPos, string(r))
+		case ':':
+			return tokenFromLexer(COLON, startPos, string(r))
+		case '.':
+			return tokenFromLexer(DOT, startPos, string(r))
 
 		case '(':
 			return tokenFromLexer(LEFT_PARENTHESIS, startPos, string(r))
