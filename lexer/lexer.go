@@ -71,7 +71,7 @@ const (
 	COMMA     = "COMMA"
 	SEMICOLON = "SEMICOLON"
 	COLON     = "COLON"
-	DOT	  = "DOT"
+	DOT       = "DOT"
 )
 
 type Position struct {
@@ -208,12 +208,6 @@ func (l *Lexer) NextToken() *Token {
 			return tokenFromLexer(LEFT_SQUARE_BRACKET, startPos, string(r))
 		case ']':
 			return tokenFromLexer(RIGHT_SQUARE_BRACKET, startPos, string(r))
-		case ',':
-			return tokenFromLexer(COMMA, startPos, string(r))
-		case ';':
-			return tokenFromLexer(SEMICOLON, startPos, string(r))
-		case ':':
-			return tokenFromLexer(COLON, startPos, string(r))
 
 		case '+':
 			nextR, _, err := l.reader.ReadRune()
