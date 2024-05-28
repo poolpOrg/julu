@@ -167,6 +167,7 @@ func TestLexNumber(t *testing.T) {
 		{input: "0xFA.0xFA", expected: lexer.Token{Type: lexer.FLOAT, Literal: "0xFA.0xFA"}},
 		{input: ".0xFA", expected: lexer.Token{Type: lexer.FLOAT, Literal: ".0xFA"}},
 		{input: "0xFA.", expected: lexer.Token{Type: lexer.FLOAT, Literal: "0xFA."}},
+		{input: "1_000", expected: lexer.Token{Type: lexer.INTEGER, Literal: "1000"}},
 	}
 
 	for tid, tt := range tests {
