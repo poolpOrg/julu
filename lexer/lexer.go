@@ -234,6 +234,16 @@ func (l *Lexer) Lex() Token {
 		case ':':
 			return tokenFromLexer(COLON, startPos, string(r))
 		case '.':
+			nextR, _, err := l.reader.ReadRune()
+			if err == nil {
+				l.pos.column++
+				if unicode.IsDigit(nextR) {
+					l.backup()
+					tokenType, lit := l.lexNumber(FLOAT)
+					return tokenFromLexer(tokenType, startPos, "."+lit)
+				}
+				l.backup()
+			}
 			return tokenFromLexer(DOT, startPos, string(r))
 
 		case '(':
@@ -453,7 +463,7 @@ func (l *Lexer) Lex() Token {
 				continue
 			} else if unicode.IsDigit(r) {
 				l.backup()
-				tokenType, lit := l.lexNumber()
+				tokenType, lit := l.lexNumber(INTEGER)
 				return tokenFromLexer(tokenType, startPos, lit)
 			} else if unicode.IsLetter(r) || r == '_' {
 				l.backup()
@@ -473,13 +483,12 @@ func (l *Lexer) Lex() Token {
 }
 
 // XXX - fix to handle floats and other bases than 10
-func (l *Lexer) lexNumber() (TokenType, string) {
+func (l *Lexer) lexNumber(tokenType TokenType) (TokenType, string) {
 	var lit string
 	base := 10
 	baseOffset := 0
 	offset := 0
 
-	var tokenType TokenType = INTEGER
 	for {
 		r, _, err := l.reader.ReadRune()
 		if err != nil {

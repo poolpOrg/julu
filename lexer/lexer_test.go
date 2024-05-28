@@ -143,10 +143,10 @@ func TestLexer(t *testing.T) {
 		for _, expectedToken := range tt.expected {
 			tok := l.Lex()
 			if tok.Type != expectedToken.Type {
-				t.Fatalf("test %d: expected token type %q, got %q", tid, expectedToken.Type, tok.Type)
+				t.Fatalf("[#%d] expected token type %q, got %q", tid, expectedToken.Type, tok.Type)
 			}
 			if tok.Literal != expectedToken.Literal {
-				t.Fatalf("test %d: expected token literal %q, got %q", tid, expectedToken.Literal, tok.Literal)
+				t.Fatalf("[#%d] expected token literal %q, got %q", tid, expectedToken.Literal, tok.Literal)
 			}
 		}
 	}
@@ -159,19 +159,24 @@ func TestLexNumber(t *testing.T) {
 	}{
 		{input: "123", expected: lexer.Token{Type: lexer.INTEGER, Literal: "123"}},
 		{input: "123.456", expected: lexer.Token{Type: lexer.FLOAT, Literal: "123.456"}},
+		{input: "123.", expected: lexer.Token{Type: lexer.FLOAT, Literal: "123."}},
+		{input: ".123", expected: lexer.Token{Type: lexer.FLOAT, Literal: ".123"}},
 		{input: "0b101", expected: lexer.Token{Type: lexer.INTEGER, Literal: "0b101"}},
 		{input: "0o77", expected: lexer.Token{Type: lexer.INTEGER, Literal: "0o77"}},
 		{input: "0xFA", expected: lexer.Token{Type: lexer.INTEGER, Literal: "0xFA"}},
+		{input: "0xFA.0xFA", expected: lexer.Token{Type: lexer.FLOAT, Literal: "0xFA.0xFA"}},
+		{input: ".0xFA", expected: lexer.Token{Type: lexer.FLOAT, Literal: ".0xFA"}},
+		{input: "0xFA.", expected: lexer.Token{Type: lexer.FLOAT, Literal: "0xFA."}},
 	}
 
-	for _, tt := range tests {
+	for tid, tt := range tests {
 		l := lexer.New(bufio.NewReader(strings.NewReader(tt.input)))
 		tok := l.Lex()
 		if tok.Type != tt.expected.Type {
-			t.Fatalf("expected token type %q, got %q", tt.expected.Type, tok.Type)
+			t.Fatalf("[#%d] expected token type %q, got %q", tid, tt.expected.Type, tok.Type)
 		}
 		if tok.Literal != tt.expected.Literal {
-			t.Fatalf("expected token literal %q, got %q", tt.expected.Literal, tok.Literal)
+			t.Fatalf("[#%d] expected token literal %q, got %q", tid, tt.expected.Literal, tok.Literal)
 		}
 	}
 }
@@ -187,14 +192,14 @@ func TestLexIdentifier(t *testing.T) {
 		{input: "y", expected: lexer.Token{Type: lexer.IDENTIFIER, Literal: "y"}},
 	}
 
-	for _, tt := range tests {
+	for tid, tt := range tests {
 		l := lexer.New(bufio.NewReader(strings.NewReader(tt.input)))
 		tok := l.Lex()
 		if tok.Type != tt.expected.Type {
-			t.Fatalf("expected token type %q, got %q", tt.expected.Type, tok.Type)
+			t.Fatalf("[#%d] expected token type %q, got %q", tid, tt.expected.Type, tok.Type)
 		}
 		if tok.Literal != tt.expected.Literal {
-			t.Fatalf("expected token literal %q, got %q", tt.expected.Literal, tok.Literal)
+			t.Fatalf("[#%d] expected token literal %q, got %q", tid, tt.expected.Literal, tok.Literal)
 		}
 	}
 }
@@ -207,6 +212,96 @@ func TestLexString(t *testing.T) {
 		{input: `"string"`, expected: lexer.Token{Type: lexer.STRING, Literal: "string"}},
 		{input: "`raw string`", expected: lexer.Token{Type: lexer.STRING, Literal: "raw string"}},
 		{input: `f"formatted string"`, expected: lexer.Token{Type: lexer.FSTRING, Literal: "formatted string"}},
+	}
+
+	for tid, tt := range tests {
+		l := lexer.New(bufio.NewReader(strings.NewReader(tt.input)))
+		tok := l.Lex()
+		if tok.Type != tt.expected.Type {
+			t.Fatalf("[#%d] expected token type %q, got %q", tid, tt.expected.Type, tok.Type)
+		}
+		if tok.Literal != tt.expected.Literal {
+			t.Fatalf("[#%d] expected token literal %q, got %q", tid, tt.expected.Literal, tok.Literal)
+		}
+	}
+}
+
+func TestLexKeywords(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected lexer.Token
+	}{
+		{input: "let", expected: lexer.Token{Type: lexer.LET, Literal: "let"}},
+		{input: "is", expected: lexer.Token{Type: lexer.IS, Literal: "is"}},
+		{input: "in", expected: lexer.Token{Type: lexer.IN, Literal: "in"}},
+		{input: "and", expected: lexer.Token{Type: lexer.LOGICAL_AND, Literal: "and"}},
+		{input: "or", expected: lexer.Token{Type: lexer.LOGICAL_OR, Literal: "or"}},
+		{input: "not", expected: lexer.Token{Type: lexer.LOGICAL_NOT, Literal: "not"}},
+		{input: "true", expected: lexer.Token{Type: lexer.TRUE, Literal: "true"}},
+		{input: "false", expected: lexer.Token{Type: lexer.FALSE, Literal: "false"}},
+		{input: "if", expected: lexer.Token{Type: lexer.IF, Literal: "if"}},
+		{input: "else", expected: lexer.Token{Type: lexer.ELSE, Literal: "else"}},
+		{input: "return", expected: lexer.Token{Type: lexer.RETURN, Literal: "return"}},
+		{input: "fn", expected: lexer.Token{Type: lexer.FN, Literal: "fn"}},
+	}
+
+	for tid, tt := range tests {
+		l := lexer.New(bufio.NewReader(strings.NewReader(tt.input)))
+		tok := l.Lex()
+		if tok.Type != tt.expected.Type {
+			t.Fatalf("[#%d] expected token type %q, got %q", tid, tt.expected.Type, tok.Type)
+		}
+		if tok.Literal != tt.expected.Literal {
+			t.Fatalf("[#%d] expected token literal %q, got %q", tid, tt.expected.Literal, tok.Literal)
+		}
+	}
+}
+
+func TestBackupAndSkip(t *testing.T) {
+	input := `+ -
+	# this is a comment
+	// This is a comment
+	/* This is a
+	multiline comment */
+	`
+
+	l := lexer.New(bufio.NewReader(strings.NewReader(input)))
+
+	// Test backup
+	tok := l.Lex()
+	if tok.Type != lexer.ADD {
+		t.Fatalf("expected token type %q, got %q", lexer.ADD, tok.Type)
+	}
+	tok = l.Lex()
+	if tok.Type != lexer.SUB {
+		t.Fatalf("expected token type %q, got %q", lexer.SUB, tok.Type)
+	}
+
+	// Test skipping single line comment
+	tok = l.Lex()
+	if tok.Type != lexer.EOF {
+		t.Fatalf("expected token type %q, got %q", lexer.EOF, tok.Type)
+	}
+
+	// Test skipping single line comment
+	tok = l.Lex()
+	if tok.Type != lexer.EOF {
+		t.Fatalf("expected token type %q, got %q", lexer.EOF, tok.Type)
+	}
+
+	// Test skipping multiline comment
+	tok = l.Lex()
+	if tok.Type != lexer.EOF {
+		t.Fatalf("expected token type %q, got %q", lexer.EOF, tok.Type)
+	}
+}
+
+func TestLexIllegal(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected lexer.Token
+	}{
+		{input: "@", expected: lexer.Token{Type: lexer.ILLEGAL, Literal: "@"}},
 	}
 
 	for _, tt := range tests {
