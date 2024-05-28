@@ -85,10 +85,14 @@ const (
 	ELSE   = "ELSE"
 	RETURN = "RETURN"
 
+	LET = "LET"
+
 	FN = "FN"
 )
 
 var keywords = map[string]TokenType{
+	"let": LET,
+
 	"is":  IS,
 	"in":  IN,
 	"and": LOGICAL_AND,
@@ -137,8 +141,8 @@ func (t *Token) Position() *Position {
 	return t.position
 }
 
-func tokenFromLexer(t TokenType, position Position, literal string) *Token {
-	return &Token{
+func tokenFromLexer(t TokenType, position Position, literal string) Token {
+	return Token{
 		Type:     t,
 		Literal:  literal,
 		position: &position,
@@ -202,7 +206,7 @@ func New(reader *bufio.Reader) *Lexer {
 	}
 }
 
-func (l *Lexer) Lex() *Token {
+func (l *Lexer) Lex() Token {
 	for {
 		r, _, err := l.reader.ReadRune()
 		if err != nil {
@@ -430,7 +434,7 @@ func (l *Lexer) Lex() *Token {
 
 		case '"':
 			l.backup()
-			tokenType, lit := l.lexString(false, '"', false)
+			tokenType, lit := l.lexString(false, '"')
 			if tokenType != STRING {
 				return tokenFromLexer(ILLEGAL, startPos, lit)
 			}
@@ -438,7 +442,7 @@ func (l *Lexer) Lex() *Token {
 
 		case '`':
 			l.backup()
-			tokenType, lit := l.lexString(true, '`', false)
+			tokenType, lit := l.lexString(true, '`')
 			if tokenType != STRING {
 				return tokenFromLexer(ILLEGAL, startPos, lit)
 			}
@@ -454,6 +458,9 @@ func (l *Lexer) Lex() *Token {
 			} else if unicode.IsLetter(r) {
 				l.backup()
 				tokenType, lit := l.lexIdentifier()
+				if tokenType == FSTRING {
+					return tokenFromLexer(tokenType, startPos, lit)
+				}
 				if tokenType != IDENTIFIER {
 					return tokenFromLexer(ILLEGAL, startPos, lit)
 				}
@@ -525,6 +532,8 @@ func (l *Lexer) lexNumber() (TokenType, string) {
 
 func (l *Lexer) lexIdentifier() (TokenType, string) {
 	var lit string
+	var idx int
+	var fbyte rune
 
 	for {
 		r, _, err := l.reader.ReadRune()
@@ -536,13 +545,19 @@ func (l *Lexer) lexIdentifier() (TokenType, string) {
 		}
 		l.pos.column++
 
+		if idx == 0 {
+			fbyte = r
+		}
+
 		if r == '"' {
 			l.backup()
-			tokenType, lit := l.lexString(false, '"', true)
-			if tokenType != STRING {
-				return ILLEGAL, lit
+			if fbyte == 'f' && idx == 1 {
+				tokenType, lit := l.lexString(false, '"')
+				if tokenType != STRING {
+					return ILLEGAL, lit
+				}
+				return FSTRING, lit
 			}
-			return FSTRING, lit
 		}
 
 		if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
@@ -550,6 +565,7 @@ func (l *Lexer) lexIdentifier() (TokenType, string) {
 			break
 		}
 		lit += string(r)
+		idx++
 	}
 
 	return IDENTIFIER, lit
@@ -592,7 +608,7 @@ func (l *Lexer) lexRune() (TokenType, string) {
 	}
 }
 
-func (l *Lexer) lexString(raw bool, delimiter rune, fstring bool) (TokenType, string) {
+func (l *Lexer) lexString(raw bool, delimiter rune) (TokenType, string) {
 	var lit string
 
 	r, _, err := l.reader.ReadRune()
