@@ -345,7 +345,7 @@ func (l *Lexer) Lex() Token {
 			if err == nil {
 				l.pos.column++
 				if nextR == '=' {
-					return tokenFromLexer(BITWISE_AND_ASSIGN, startPos, "|=")
+					return tokenFromLexer(BITWISE_OR_ASSIGN, startPos, "|=")
 				} else if nextR == '|' {
 					return tokenFromLexer(LOGICAL_OR, startPos, "||")
 				}
@@ -455,7 +455,7 @@ func (l *Lexer) Lex() Token {
 				l.backup()
 				tokenType, lit := l.lexNumber()
 				return tokenFromLexer(tokenType, startPos, lit)
-			} else if unicode.IsLetter(r) {
+			} else if unicode.IsLetter(r) || r == '_' {
 				l.backup()
 				tokenType, lit := l.lexIdentifier()
 				if tokenType == FSTRING {
@@ -560,7 +560,7 @@ func (l *Lexer) lexIdentifier() (TokenType, string) {
 			}
 		}
 
-		if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '_' {
 			l.backup()
 			break
 		}
