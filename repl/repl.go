@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/poolpOrg/julu/evaluator"
 	"github.com/poolpOrg/julu/lexer"
 	"github.com/poolpOrg/julu/parser"
 )
@@ -13,7 +14,7 @@ import (
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 	for {
-		fmt.Fprintf(out, "julu>> ")
+		fmt.Fprintf(out, ">> ")
 		scanned := scanner.Scan()
 		if !scanned {
 			return
@@ -28,7 +29,10 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		io.WriteString(out, p.Parse().String()+"\n")
+		evaluated := evaluator.Eval(p.Parse())
+		if evaluated != nil {
+			io.WriteString(out, evaluated.Inspect()+"\n")
+		}
 	}
 }
 
