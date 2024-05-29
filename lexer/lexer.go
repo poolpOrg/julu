@@ -77,6 +77,7 @@ const (
 	IN = "IN"
 
 	// Keywords
+	NULL  = "NULL"
 	TRUE  = "TRUE"
 	FALSE = "FALSE"
 
@@ -92,6 +93,8 @@ const (
 
 var keywords = map[string]TokenType{
 	"let": LET,
+
+	"null": NULL,
 
 	"is":  IS,
 	"in":  IN,
