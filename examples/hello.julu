@@ -1,0 +1,2 @@
+let name = "gilles";
+fn main() => println("Hello world, " + name + " !")

@@ -274,3 +274,25 @@ func (n *IndexExpression) TokenLiteral() string {
 func (n *IndexExpression) String() string {
 	return "(" + n.Left.String() + "[" + n.Index.String() + "])"
 }
+
+type HashLiteral struct {
+	Token lexer.Token // The '{' token
+	Pairs map[Expression]Expression
+}
+
+func NewHashLiteral(token lexer.Token) *HashLiteral {
+	return &HashLiteral{
+		Token: token,
+	}
+}
+func (n *HashLiteral) expressionNode() {}
+func (n *HashLiteral) TokenLiteral() string {
+	return n.Token.Literal
+}
+func (n *HashLiteral) String() string {
+	//pairs := []string{}
+	//for key, value := range n.Pairs {
+	//	pairs = append(pairs, key.String()+":"+value.String())
+	//}
+	return "{" + "..." + "}"
+}
