@@ -40,6 +40,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(lexer.IDENTIFIER, p.parseIdentifier)
 	p.registerPrefix(lexer.INTEGER, p.parseIntegerLiteral)
 	p.registerPrefix(lexer.STRING, p.parseStringLiteral)
+	p.registerPrefix(lexer.NULL, p.parseStringLiteral)
 	p.registerPrefix(lexer.FSTRING, p.parseFStringLiteral)
 	p.registerPrefix(lexer.LOGICAL_NOT, p.parsePrefixExpression) // !x
 	p.registerPrefix(lexer.BITWISE_NOT, p.parsePrefixExpression) // !x
