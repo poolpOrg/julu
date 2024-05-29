@@ -232,3 +232,45 @@ func (n *FStringLiteral) TokenLiteral() string {
 func (n *FStringLiteral) String() string {
 	return "f\"" + n.Token.Literal + "\""
 }
+
+type ArrayLiteral struct {
+	Token    lexer.Token // The '[' token
+	Elements []Expression
+}
+
+func NewArrayLiteral(token lexer.Token) *ArrayLiteral {
+	return &ArrayLiteral{
+		Token: token,
+	}
+}
+func (n *ArrayLiteral) expressionNode() {}
+func (n *ArrayLiteral) TokenLiteral() string {
+	return n.Token.Literal
+}
+func (n *ArrayLiteral) String() string {
+	elements := []string{}
+	for _, el := range n.Elements {
+		elements = append(elements, el.String())
+	}
+	return "[" + "..." + "]"
+}
+
+type IndexExpression struct {
+	Token lexer.Token // The '[' token
+	Left  Expression
+	Index Expression
+}
+
+func NewIndexExpression(token lexer.Token, left Expression) *IndexExpression {
+	return &IndexExpression{
+		Token: token,
+		Left:  left,
+	}
+}
+func (n *IndexExpression) expressionNode() {}
+func (n *IndexExpression) TokenLiteral() string {
+	return n.Token.Literal
+}
+func (n *IndexExpression) String() string {
+	return "(" + n.Left.String() + "[" + n.Index.String() + "])"
+}

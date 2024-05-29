@@ -16,6 +16,7 @@ const (
 	BITSHIFT    // <<, >>
 	PREFIX      // -X or !X
 	CALL        // myFunction(X)
+	INDEX       // array[index]
 )
 
 var precedences = map[lexer.TokenType]int{
@@ -29,19 +30,20 @@ var precedences = map[lexer.TokenType]int{
 	lexer.LOGICAL_AND: COMPARISON,
 	lexer.LOGICAL_OR:  COMPARISON,
 
-	lexer.BITWISE_AND:      BITWISE,
-	lexer.BITWISE_OR:       BITWISE,
-	lexer.BITWISE_XOR:      BITWISE,
-	lexer.RSHIFT:           BITSHIFT,
-	lexer.LSHIFT:           BITSHIFT,
-	lexer.CIRCULAR_RSHIFT:  BITSHIFT,
-	lexer.CIRCULAR_LSHIFT:  BITSHIFT,
-	lexer.ADD:              SUM,
-	lexer.SUB:              SUM,
-	lexer.MUL:              PRODUCT,
-	lexer.DIV:              PRODUCT,
-	lexer.MOD:              PRODUCT,
-	lexer.LEFT_PARENTHESIS: CALL,
+	lexer.BITWISE_AND:         BITWISE,
+	lexer.BITWISE_OR:          BITWISE,
+	lexer.BITWISE_XOR:         BITWISE,
+	lexer.RSHIFT:              BITSHIFT,
+	lexer.LSHIFT:              BITSHIFT,
+	lexer.CIRCULAR_RSHIFT:     BITSHIFT,
+	lexer.CIRCULAR_LSHIFT:     BITSHIFT,
+	lexer.ADD:                 SUM,
+	lexer.SUB:                 SUM,
+	lexer.MUL:                 PRODUCT,
+	lexer.DIV:                 PRODUCT,
+	lexer.MOD:                 PRODUCT,
+	lexer.LEFT_PARENTHESIS:    CALL,
+	lexer.LEFT_SQUARE_BRACKET: INDEX,
 }
 
 func (p *Parser) peekPrecedence() int {
