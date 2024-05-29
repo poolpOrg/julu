@@ -107,6 +107,23 @@ func (n *Boolean) String() string {
 	return n.Token.Literal
 }
 
+type Null struct {
+	Token lexer.Token
+}
+
+func NewNull(token lexer.Token) *Null {
+	return &Null{
+		Token: token,
+	}
+}
+func (n *Null) expressionNode() {}
+func (n *Null) TokenLiteral() string {
+	return n.Token.Literal
+}
+func (n *Null) String() string {
+	return "null"
+}
+
 type IfExpression struct {
 	Token       lexer.Token // The 'if' token
 	Condition   Expression
