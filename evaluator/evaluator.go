@@ -458,33 +458,6 @@ func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Obje
 	return &object.Hash{Pairs: pairs}
 }
 
-/*
-func substituteString(str string) (string, error) {
-	start := 0
-	for {
-		start = strings.Index(str[start:], "{")
-		if start == -1 {
-			break
-		}
-		end := strings.Index(str[start:], "}")
-		if end == -1 {
-			return "", errors.New("unmatched '{' found in the string")
-		}
-
-		placeholder := str[start+1 : start+end]
-		value, err := Eval(placeholder)
-		if err != nil {
-			return "", err
-		}
-
-		str = str[:start] + value + str[start+end+1:]
-		start += len(value) // Update start to continue after the replaced value
-	}
-
-	return str, nil
-}
-*/
-
 func evalFStringLiteral(node *ast.FStringLiteral, env *object.Environment) object.Object {
 	newEnv := object.NewEnclosedEnvironment(env)
 
