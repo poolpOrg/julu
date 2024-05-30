@@ -54,6 +54,10 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(lexer.LEFT_PARENTHESIS, p.parseGroupedExpression)
 	p.registerPrefix(lexer.LEFT_SQUARE_BRACKET, p.parseArrayLiteral)
 	p.registerPrefix(lexer.LEFT_CURLY_BRACKET, p.parseHashLiteral)
+	p.registerPrefix(lexer.LOOP, p.parseLoopStatement)
+	p.registerPrefix(lexer.WHILE, p.parseWhileStatement)
+	p.registerPrefix(lexer.UNTIL, p.parseUntilStatement)
+	p.registerPrefix(lexer.FOR, p.parseForStatement)
 
 	p.registerInfix(lexer.ADD, p.parseInfixExpression)
 	p.registerInfix(lexer.SUB, p.parseInfixExpression)
@@ -320,7 +324,10 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	p.nextToken()
 
 	if block.Token.Type == lexer.ARROW {
-		block.Statements = append(block.Statements, &ast.ExpressionStatement{Expression: p.parseExpression(LOWEST)})
+		stmt := p.parseStatement()
+		if stmt != nil {
+			block.Statements = append(block.Statements, stmt)
+		}
 		return block
 	}
 
@@ -486,4 +493,86 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 	}
 
 	return hash
+}
+
+func (p *Parser) parseLoopStatement() ast.Expression {
+	if p.peekTokenIs(lexer.UNTIL) {
+		p.nextToken()
+		return p.parseUntilStatement()
+	}
+	if p.peekTokenIs(lexer.WHILE) {
+		p.nextToken()
+		return p.parseWhileStatement()
+	}
+	if p.peekTokenIs(lexer.FOR) {
+		p.nextToken()
+		return p.parseForStatement()
+	}
+
+	stmt := ast.NewLoopStatement(p.curToken)
+
+	if !p.peekTokenIs(lexer.ARROW) && !p.peekTokenIs(lexer.LEFT_CURLY_BRACKET) {
+		return nil
+	}
+	p.nextToken()
+
+	stmt.Body = p.parseBlockStatement()
+
+	return stmt
+}
+
+func (p *Parser) parseWhileStatement() ast.Expression {
+	stmt := ast.NewLoopStatement(p.curToken)
+
+	p.nextToken()
+	stmt.WhileCondition = p.parseExpression(LOWEST)
+
+	if !p.peekTokenIs(lexer.ARROW) && !p.peekTokenIs(lexer.LEFT_CURLY_BRACKET) {
+		return nil
+	}
+	p.nextToken()
+
+	stmt.Body = p.parseBlockStatement()
+
+	return stmt
+}
+
+func (p *Parser) parseUntilStatement() ast.Expression {
+	stmt := ast.NewLoopStatement(p.curToken)
+
+	p.nextToken()
+	stmt.UntilCondition = p.parseExpression(LOWEST)
+
+	if !p.peekTokenIs(lexer.ARROW) && !p.peekTokenIs(lexer.LEFT_CURLY_BRACKET) {
+		return nil
+	}
+	p.nextToken()
+
+	stmt.Body = p.parseBlockStatement()
+
+	return stmt
+}
+
+func (p *Parser) parseForStatement() ast.Expression {
+	stmt := ast.NewForStatement(p.curToken)
+	p.nextToken()
+
+	stmt.Variable = p.parseIdentifier()
+
+	if !p.peekTokenIs(lexer.IN) {
+		return nil
+	}
+	p.nextToken()
+	p.nextToken()
+
+	stmt.Iterable = p.parseExpression(LOWEST)
+
+	if !p.peekTokenIs(lexer.ARROW) && !p.peekTokenIs(lexer.LEFT_CURLY_BRACKET) {
+		return nil
+	}
+	p.nextToken()
+
+	stmt.Body = p.parseBlockStatement()
+
+	return stmt
 }

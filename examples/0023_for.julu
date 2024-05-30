@@ -1,0 +1,13 @@
+fn main {
+    loop for x in y {
+        println("loop");
+    }
+
+    loop for x in y => println("loop");
+
+    for x in y {
+        println("loop");
+    }
+
+    for x in y => println("loop");
+}

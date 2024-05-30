@@ -89,6 +89,11 @@ const (
 	LET = "LET"
 
 	FN = "FN"
+
+	FOR   = "FOR"
+	LOOP  = "LOOP"
+	WHILE = "WHILE"
+	UNTIL = "UNTIL"
 )
 
 var keywords = map[string]TokenType{
@@ -108,6 +113,11 @@ var keywords = map[string]TokenType{
 	"else":   ELSE,
 	"return": RETURN,
 	"fn":     FN,
+
+	"loop":  LOOP,
+	"while": WHILE,
+	"until": UNTIL,
+	"for":   FOR,
 }
 
 func LookupIdent(ident string) TokenType {

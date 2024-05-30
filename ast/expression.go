@@ -374,3 +374,76 @@ func (n *HashLiteral) String() string {
 func (n *HashLiteral) Inspect(level int) string {
 	return fmt.Sprintf("%s%T: %s\n", strings.Repeat(" ", level*2), n, n.String())
 }
+
+type LoopStatement struct {
+	Token          lexer.Token // the { token
+	WhileCondition Expression
+	UntilCondition Expression
+	Body           *BlockStatement
+}
+
+func NewLoopStatement(token lexer.Token) *LoopStatement {
+	return &LoopStatement{
+		Token: token,
+	}
+}
+
+func (n *LoopStatement) expressionNode() {}
+func (n *LoopStatement) TokenLiteral() string {
+	return n.Token.Literal
+}
+func (n *LoopStatement) String() string {
+	return n.Token.Literal + " " + n.Body.String()
+}
+func (n *LoopStatement) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T\n", strings.Repeat(" ", level*2), n)
+	if n.WhileCondition != nil {
+		out += strings.Repeat(" ", (level+1)*2) + "WhileCondition:\n"
+		out += n.WhileCondition.Inspect(level + 2)
+	}
+	if n.UntilCondition != nil {
+		out += strings.Repeat(" ", (level+1)*2) + "UntilCondition:\n"
+		out += n.UntilCondition.Inspect(level + 2)
+	}
+	if n.WhileCondition != nil || n.UntilCondition != nil {
+		out += strings.Repeat(" ", (level+1)*2) + "Body:\n"
+		out += n.Body.Inspect(level + 2)
+	} else {
+		out += n.Body.Inspect(level + 1)
+	}
+	return out
+}
+
+type ForStatement struct {
+	Token    lexer.Token // the { token
+	Variable Expression
+	Iterable Expression
+	Body     *BlockStatement
+}
+
+func NewForStatement(token lexer.Token) *ForStatement {
+	return &ForStatement{
+		Token: token,
+	}
+}
+
+func (n *ForStatement) expressionNode() {}
+func (n *ForStatement) TokenLiteral() string {
+	return n.Token.Literal
+}
+func (n *ForStatement) String() string {
+	return n.Token.Literal + " " + n.Body.String()
+}
+func (n *ForStatement) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T\n", strings.Repeat(" ", level*2), n)
+
+	out += strings.Repeat(" ", (level+1)*2) + "Variable:\n"
+	out += n.Variable.Inspect(level + 2)
+	if n.Iterable != nil {
+		out += strings.Repeat(" ", (level+1)*2) + "Iterable:\n"
+		out += n.Iterable.Inspect(level + 2)
+	}
+	return out
+}
