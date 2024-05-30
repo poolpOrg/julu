@@ -42,7 +42,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(lexer.IDENTIFIER, p.parseIdentifier)
 	p.registerPrefix(lexer.INTEGER, p.parseIntegerLiteral)
 	p.registerPrefix(lexer.STRING, p.parseStringLiteral)
-	p.registerPrefix(lexer.NULL, p.parseStringLiteral)
+	p.registerPrefix(lexer.NULL, p.parseNull)
 	p.registerPrefix(lexer.FSTRING, p.parseFStringLiteral)
 	p.registerPrefix(lexer.LOGICAL_NOT, p.parsePrefixExpression) // !x
 	p.registerPrefix(lexer.BITWISE_NOT, p.parsePrefixExpression) // !x
@@ -267,6 +267,10 @@ func (p *Parser) parseBoolean() ast.Expression {
 	return ast.NewBoolean(p.curToken, p.curTokenIs(lexer.TRUE))
 }
 
+func (p *Parser) parseNull() ast.Expression {
+	return ast.NewNull(p.curToken)
+}
+
 func (p *Parser) parseGroupedExpression() ast.Expression {
 	p.nextToken()
 
@@ -282,28 +286,29 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 func (p *Parser) parseIfExpression() ast.Expression {
 	expression := ast.NewIfExpression(p.curToken)
 
-	if !p.expectPeek(lexer.LEFT_PARENTHESIS) {
-		return nil
-	}
-
 	p.nextToken()
 	expression.Condition = p.parseExpression(LOWEST)
 
-	if !p.expectPeek(lexer.RIGHT_PARENTHESIS) {
+	if !p.peekTokenIs(lexer.LEFT_CURLY_BRACKET) && !p.peekTokenIs(lexer.ARROW) {
 		return nil
 	}
-
-	if !p.expectPeek(lexer.LEFT_CURLY_BRACKET) {
-		return nil
-	}
-
+	p.nextToken()
 	expression.Consequence = p.parseBlockStatement()
 
 	if p.peekTokenIs(lexer.ELSE) {
 		p.nextToken()
-		if !p.expectPeek(lexer.LEFT_CURLY_BRACKET) {
+
+		if p.peekTokenIs(lexer.IF) {
+			p.nextToken()
+			expression.ConditionalAlternative = p.parseIfExpression().(*ast.IfExpression)
+			return expression
+		}
+		// if the next token is IS, then we have a conditional else
+
+		if !p.peekTokenIs(lexer.LEFT_CURLY_BRACKET) && !p.peekTokenIs(lexer.ARROW) {
 			return nil
 		}
+		p.nextToken()
 		expression.Alternative = p.parseBlockStatement()
 	}
 

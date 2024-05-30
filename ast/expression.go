@@ -156,10 +156,11 @@ func (n *Null) Inspect(level int) string {
 }
 
 type IfExpression struct {
-	Token       lexer.Token // The 'if' token
-	Condition   Expression
-	Consequence *BlockStatement
-	Alternative *BlockStatement
+	Token                  lexer.Token // The 'if' token
+	Condition              Expression
+	Consequence            *BlockStatement
+	ConditionalAlternative *IfExpression
+	Alternative            *BlockStatement
 }
 
 func NewIfExpression(token lexer.Token) *IfExpression {
@@ -181,12 +182,19 @@ func (n *IfExpression) String() string {
 func (n *IfExpression) Inspect(level int) string {
 	var out string
 	out += fmt.Sprintf("%s%T\n", strings.Repeat(" ", level*2), n)
-	out += n.Condition.Inspect(level + 1)
+	out += strings.Repeat(" ", (level+1)*2) + "Condition:\n"
+	out += n.Condition.Inspect(level + 2)
 	if n.Consequence != nil {
-		out += n.Consequence.Inspect(level + 1)
+		out += strings.Repeat(" ", (level+1)*2) + "Consequence:\n"
+		out += n.Consequence.Inspect(level + 2)
+	}
+	if n.ConditionalAlternative != nil {
+		out += strings.Repeat(" ", (level+1)*2) + "ConditionalAlternative:\n"
+		out += n.ConditionalAlternative.Inspect(level + 2)
 	}
 	if n.Alternative != nil {
-		out += n.Alternative.Inspect(level + 1)
+		out += strings.Repeat(" ", (level+1)*2) + "Alternative:\n"
+		out += n.Alternative.Inspect(level + 2)
 	}
 	return out
 }
