@@ -46,6 +46,10 @@ var precedences = map[lexer.TokenType]int{
 	lexer.LEFT_SQUARE_BRACKET: INDEX,
 }
 
+func GetPrecedenceTable() map[lexer.TokenType]int {
+	return precedences
+}
+
 func (p *Parser) peekPrecedence() int {
 	if p, ok := precedences[p.peekToken.Type]; ok {
 		return p
