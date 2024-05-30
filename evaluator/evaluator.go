@@ -59,6 +59,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
 
+	case *ast.MatchExpression:
+		return evalMatchExpression(node, env)
+
 	case *ast.ReturnStatement:
 		val := Eval(node.ReturnValue, env)
 		if isError(val) {
@@ -294,6 +297,31 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Obje
 	}
 }
 
+func evalMatchExpression(ie *ast.MatchExpression, env *object.Environment) object.Object {
+	condition := Eval(ie.Condition, env)
+	if isError(condition) {
+		return condition
+	}
+
+	for _, match := range ie.MatchBlock.Cases {
+		if match.Condition != nil {
+			caseCondition := Eval(match.Condition, env)
+			if isError(caseCondition) {
+				return caseCondition
+			}
+			if isEqual(condition, caseCondition) {
+				return Eval(match.Consequence, env)
+			}
+		}
+	}
+
+	if ie.Alternative != nil {
+		return Eval(ie.Alternative, env)
+	}
+
+	return NULL
+}
+
 func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) object.Object {
 	var result object.Object
 
@@ -518,6 +546,16 @@ func isTruthy(obj object.Object) bool {
 	default:
 		return true
 	}
+}
+
+func isEqual(obj1 object.Object, obj2 object.Object) bool {
+	if obj1.Type() != obj2.Type() {
+		return false
+	}
+	if obj1.Inspect() != obj2.Inspect() {
+		return false
+	}
+	return true
 }
 
 func isError(obj object.Object) bool {
