@@ -1,6 +1,6 @@
 fn main {
     match x {
-        if x==1 => println("match")
-        if x!=1 => println("mismatch")
+        case x==1 if x%2 == 0 => println("match")
+        case x!=1 => println("mismatch")
     } else => println("found no match!")
 }

@@ -133,7 +133,7 @@ func (n *BlockStatement) Inspect(level int) string {
 
 type MatchBlockStatement struct {
 	Token lexer.Token // the { token
-	Cases []IfExpression
+	Cases []CaseExpression
 }
 
 func NewMatchBlockStatement(token lexer.Token) *MatchBlockStatement {

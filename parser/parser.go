@@ -599,13 +599,13 @@ func (p *Parser) parseMatchBlockStatement() *ast.MatchBlockStatement {
 	p.nextToken()
 
 	if block.Token.Type == lexer.ARROW {
-		stmt := p.parseIfExpression()
+		stmt := p.parseCaseExpression()
 		if stmt == nil {
 			p.pushError("expected if expression")
 			return nil
 		}
 
-		if stmt, ok := stmt.(*ast.IfExpression); !ok {
+		if stmt, ok := stmt.(*ast.CaseExpression); !ok {
 			p.pushError("expected if expression")
 			return nil
 		} else {
@@ -616,13 +616,13 @@ func (p *Parser) parseMatchBlockStatement() *ast.MatchBlockStatement {
 	}
 
 	for !p.curTokenIs(lexer.RIGHT_CURLY_BRACKET) {
-		stmt := p.parseIfExpression()
+		stmt := p.parseCaseExpression()
 		if stmt == nil {
 			p.pushError("expected if expression")
 			return nil
 		}
 
-		if stmt, ok := stmt.(*ast.IfExpression); !ok {
+		if stmt, ok := stmt.(*ast.CaseExpression); !ok {
 			p.pushError("expected if expression")
 			return nil
 		} else {
@@ -633,4 +633,27 @@ func (p *Parser) parseMatchBlockStatement() *ast.MatchBlockStatement {
 	}
 
 	return block
+}
+
+func (p *Parser) parseCaseExpression() ast.Expression {
+	if !p.curTokenIs(lexer.CASE) {
+		return nil
+	}
+	p.nextToken()
+
+	expression := ast.NewCaseExpression(p.curToken)
+	expression.Condition = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(lexer.IF) {
+		p.nextToken()
+		p.nextToken()
+		expression.Guard = p.parseExpression(LOWEST)
+	}
+
+	if !p.peekTokenIs(lexer.LEFT_CURLY_BRACKET) && !p.peekTokenIs(lexer.ARROW) {
+		return nil
+	}
+	p.nextToken()
+	expression.Consequence = p.parseBlockStatement()
+	return expression
 }

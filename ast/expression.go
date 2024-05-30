@@ -488,3 +488,39 @@ func (n *MatchExpression) Inspect(level int) string {
 	}
 	return out
 }
+
+type CaseExpression struct {
+	Token       lexer.Token // The 'if' token
+	Condition   Expression
+	Guard       Expression
+	Consequence *BlockStatement
+}
+
+func NewCaseExpression(token lexer.Token) *CaseExpression {
+	return &CaseExpression{
+		Token: token,
+	}
+}
+func (n *CaseExpression) expressionNode() {}
+func (n *CaseExpression) TokenLiteral() string {
+	return n.Token.Literal
+}
+func (n *CaseExpression) String() string {
+	out := "case " + n.Condition.String() + " " + n.Consequence.String()
+	return out
+}
+func (n *CaseExpression) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T\n", strings.Repeat(" ", level*2), n)
+	out += strings.Repeat(" ", (level+1)*2) + "Condition:\n"
+	out += n.Condition.Inspect(level + 2)
+	if n.Guard != nil {
+		out += strings.Repeat(" ", (level+1)*2) + "Guard:\n"
+		out += n.Guard.Inspect(level + 2)
+	}
+	if n.Consequence != nil {
+		out += strings.Repeat(" ", (level+1)*2) + "Consequence:\n"
+		out += n.Consequence.Inspect(level + 2)
+	}
+	return out
+}
