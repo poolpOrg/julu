@@ -175,6 +175,10 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 	stmt.Value = p.parseExpression(LOWEST)
 
+	if p.peekTokenIs(lexer.SEMICOLON) {
+		p.nextToken()
+	}
+
 	return stmt
 }
 
