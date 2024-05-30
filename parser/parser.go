@@ -146,18 +146,25 @@ func (p *Parser) Parse() *ast.Program {
 }
 
 func (p *Parser) parseStatement() ast.Statement {
+	var ret ast.Statement
 	switch p.curToken.Type {
 	case lexer.LET:
-		return p.parseLetStatement()
+		ret = p.parseLetStatement()
 	case lexer.RETURN:
-		return p.parseReturnStatement()
+		ret = p.parseReturnStatement()
 	case lexer.BREAK:
-		return p.parseBreakStatement()
+		ret = p.parseBreakStatement()
 	case lexer.CONTINUE:
-		return p.parseContinueStatement()
+		ret = p.parseContinueStatement()
 	default:
-		return p.parseExpressionStatement()
+		ret = p.parseExpressionStatement()
 	}
+
+	if p.peekTokenIs(lexer.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return ret
 }
 
 func (p *Parser) parseLetStatement() *ast.LetStatement {
@@ -175,35 +182,23 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 	stmt.Value = p.parseExpression(LOWEST)
 
-	if p.peekTokenIs(lexer.SEMICOLON) {
-		p.nextToken()
-	}
-
 	return stmt
 }
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	stmt := ast.NewReturnStatement(p.curToken)
-
 	p.nextToken()
 
 	stmt.ReturnValue = p.parseExpression(LOWEST)
-
-	for !p.curTokenIs(lexer.SEMICOLON) {
-		p.nextToken()
-	}
-
 	return stmt
 }
 
 func (p *Parser) parseBreakStatement() *ast.BreakStatement {
-	stmt := ast.NewBreakStatement(p.curToken)
-	return stmt
+	return ast.NewBreakStatement(p.curToken)
 }
 
 func (p *Parser) parseContinueStatement() *ast.ContinueStatement {
-	stmt := ast.NewContinueStatement(p.curToken)
-	return stmt
+	return ast.NewContinueStatement(p.curToken)
 }
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
