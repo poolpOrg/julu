@@ -151,6 +151,7 @@ func EvalFunctionObject(fn object.Object, env *object.Environment) object.Object
 	}
 
 	fn = fn.(*object.Function)
+	// evaluate function parameters and match with prototype
 	//args := evalExpressions(fn.Parameters, env)
 	//if len(args) == 1 && isError(args[0]) {
 	//	return args[0]
