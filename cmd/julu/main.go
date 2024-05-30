@@ -92,6 +92,12 @@ func main() {
 		if evaluated.Type() == object.INTEGER_OBJ {
 			os.Exit(int(evaluated.(*object.Integer).Value))
 		}
+		if evaluated.Type() == object.BOOLEAN_OBJ {
+			if evaluated.(*object.Boolean).Value {
+				os.Exit(0)
+			}
+			os.Exit(1)
+		}
 		if evaluated.Type() == object.ERROR_OBJ {
 			fmt.Fprintf(os.Stderr, "error: %s\n", evaluated.Inspect())
 			os.Exit(1)
