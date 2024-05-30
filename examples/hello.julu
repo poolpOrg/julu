@@ -1,5 +1,2 @@
-let foobar = "42";
-let barbaz = "43";
-let bazqux = "44";
-
-fn main() => println(f"{bazqux} Hello {foobar} world {barbaz} !")
+println("hello world !");
+ 

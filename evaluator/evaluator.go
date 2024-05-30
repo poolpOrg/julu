@@ -316,7 +316,9 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 		return builtin
 	}
 
-	return newError("identifier not found: " + node.Value)
+	msg := fmt.Sprintf("[%d:%d] identifier not found: %s", node.Token.Position().Line(), node.Token.Position().Column(), node.Value)
+
+	return newError(msg)
 }
 
 func evalExpressions(exps []ast.Expression, env *object.Environment) []object.Object {

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	"github.com/poolpOrg/julu/evaluator"
 	"github.com/poolpOrg/julu/lexer"
@@ -19,31 +18,31 @@ import (
 func main() {
 	flag.Parse()
 
-	if term.IsTerminal(int(os.Stdin.Fd())) {
+	if term.IsTerminal(int(os.Stdin.Fd())) && flag.NArg() == 0 {
 		os.Exit(repl.Start(os.Stdin, os.Stdout))
 	}
 
-	scanner := bufio.NewScanner(os.Stdin)
+	var err error
+	var input io.Reader = os.Stdin
+	if flag.NArg() != 0 {
+		input, err = os.Open(flag.Arg(0))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "could not open file: %s\n", err)
+			os.Exit(1)
+		}
+	}
+
+	l := lexer.New(bufio.NewReader(input))
 	env := object.NewEnvironment()
-	for {
-		scanned := scanner.Scan()
-		if !scanned {
-			os.Exit(0)
-		}
+	p := parser.New(l)
 
-		line := scanner.Text()
-		l := lexer.New(bufio.NewReader(strings.NewReader(line)))
-		p := parser.New(l)
+	if len(p.Errors()) > 0 {
+		printParserErrors(os.Stderr, p.Errors())
+	}
 
-		if len(p.Errors()) > 0 {
-			printParserErrors(os.Stderr, p.Errors())
-			continue
-		}
-
-		evaluated := evaluator.Eval(p.Parse(), env)
-		if evaluated != nil {
-			io.WriteString(os.Stdout, evaluated.Inspect()+"\n")
-		}
+	evaluated := evaluator.Eval(p.Parse(), env)
+	if evaluated != nil {
+		io.WriteString(os.Stdout, evaluated.Inspect()+"\n")
 	}
 
 }
