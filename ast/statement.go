@@ -170,3 +170,47 @@ func (n *MatchBlockStatement) Inspect(level int) string {
 	}
 	return out
 }
+
+type BreakStatement struct {
+	Token lexer.Token // the token.BREAK token
+}
+
+func NewBreakStatement(token lexer.Token) *BreakStatement {
+	return &BreakStatement{
+		Token: token,
+	}
+}
+func (n *BreakStatement) statementNode() {}
+func (n *BreakStatement) TokenLiteral() string {
+	return n.Token.Literal
+}
+func (n *BreakStatement) String() string {
+	return n.Token.Literal
+}
+func (n *BreakStatement) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T\n", strings.Repeat(" ", level*2), n)
+	return out
+}
+
+type ContinueStatement struct {
+	Token lexer.Token // the token.BREAK token
+}
+
+func NewContinueStatement(token lexer.Token) *ContinueStatement {
+	return &ContinueStatement{
+		Token: token,
+	}
+}
+func (n *ContinueStatement) statementNode() {}
+func (n *ContinueStatement) TokenLiteral() string {
+	return n.Token.Literal
+}
+func (n *ContinueStatement) String() string {
+	return n.Token.Literal
+}
+func (n *ContinueStatement) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T\n", strings.Repeat(" ", level*2), n)
+	return out
+}

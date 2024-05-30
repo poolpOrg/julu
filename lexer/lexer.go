@@ -92,10 +92,12 @@ const (
 
 	FN = "FN"
 
-	FOR   = "FOR"
-	LOOP  = "LOOP"
-	WHILE = "WHILE"
-	UNTIL = "UNTIL"
+	FOR      = "FOR"
+	LOOP     = "LOOP"
+	WHILE    = "WHILE"
+	UNTIL    = "UNTIL"
+	BREAK    = "BREAK"
+	CONTINUE = "CONTINUE"
 )
 
 var keywords = map[string]TokenType{
@@ -116,12 +118,14 @@ var keywords = map[string]TokenType{
 	"return": RETURN,
 	"fn":     FN,
 
-	"loop":  LOOP,
-	"while": WHILE,
-	"until": UNTIL,
-	"for":   FOR,
-	"match": MATCH,
-	"case":  CASE,
+	"loop":     LOOP,
+	"while":    WHILE,
+	"until":    UNTIL,
+	"for":      FOR,
+	"match":    MATCH,
+	"case":     CASE,
+	"break":    BREAK,
+	"continue": CONTINUE,
 }
 
 func LookupIdent(ident string) TokenType {

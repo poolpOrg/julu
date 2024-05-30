@@ -10,6 +10,7 @@ import (
 type ObjectType string
 
 const (
+	VOID_OBJ         = "VOID"
 	INTEGER_OBJ      = "INTEGER"
 	BOOLEAN_OBJ      = "BOOLEAN"
 	NULL_OBJ         = "NULL"
@@ -20,6 +21,8 @@ const (
 	BUILTIN_OBJ      = "BUILTIN"
 	ARRAY_OBJ        = "ARRAY"
 	HASH_OBJ         = "HASH"
+	CONTINUE_OBJ     = "CONTINUE"
+	BREAK_OBJ        = "BREAK"
 )
 
 type HashKey struct {
@@ -35,6 +38,11 @@ type Object interface {
 type Hashable interface {
 	HashKey() HashKey
 }
+
+type Void struct{}
+
+func (v *Void) Type() ObjectType { return VOID_OBJ }
+func (v *Void) Inspect() string  { return "void" }
 
 type Integer struct {
 	Value int64
@@ -141,3 +149,13 @@ func (h *Hash) Inspect() string {
 	}
 	return "{" + out + "}"
 }
+
+type Break struct{}
+
+func (b *Break) Type() ObjectType { return BREAK_OBJ }
+func (b *Break) Inspect() string  { return "break" }
+
+type Continue struct{}
+
+func (c *Continue) Type() ObjectType { return CONTINUE_OBJ }
+func (c *Continue) Inspect() string  { return "continue" }

@@ -12,9 +12,12 @@ import (
 )
 
 var (
-	NULL  = &object.Null{}
-	TRUE  = &object.Boolean{Value: true}
-	FALSE = &object.Boolean{Value: false}
+	NULL     = &object.Null{}
+	TRUE     = &object.Boolean{Value: true}
+	FALSE    = &object.Boolean{Value: false}
+	BREAK    = &object.Break{}
+	CONTINUE = &object.Continue{}
+	VOID     = &object.Void{}
 )
 
 func Eval(node ast.Node, env *object.Environment) object.Object {
@@ -82,6 +85,14 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return args[0]
 		}
 		return applyFunction(fn, args)
+
+	case *ast.LoopStatement:
+		return evalLoopStatement(node, env)
+
+	case *ast.BreakStatement:
+		return BREAK
+	case *ast.ContinueStatement:
+		return CONTINUE
 
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
@@ -508,6 +519,56 @@ func evalFStringLiteral(node *ast.FStringLiteral, env *object.Environment) objec
 	}
 
 	return &object.String{Value: strCopy}
+}
+
+func evalLoopStatement(loop *ast.LoopStatement, env *object.Environment) object.Object {
+	for {
+		if loop.WhileCondition != nil {
+			condition := Eval(loop.WhileCondition, env)
+			if isError(condition) {
+				return condition
+			}
+			if !isTruthy(condition) {
+				break
+			}
+		}
+
+		if loop.UntilCondition != nil {
+			condition := Eval(loop.UntilCondition, env)
+			if isError(condition) {
+				return condition
+			}
+			if isTruthy(condition) {
+				break
+			}
+		}
+
+		shouldBreak := false
+		shouldContinue := false
+		for _, statement := range loop.Body.Statements {
+			stmtResult := Eval(statement, env)
+			if stmtResult != nil {
+				if isError(stmtResult) {
+					return stmtResult
+				}
+				if stmtResult.Type() == object.BREAK_OBJ {
+					shouldBreak = true
+					break
+				}
+				if stmtResult.Type() == object.CONTINUE_OBJ {
+					shouldContinue = true
+					break
+				}
+			}
+		}
+		if shouldBreak {
+			break
+		}
+		if shouldContinue {
+			continue
+		}
+	}
+	return VOID
 }
 
 func applyFunction(fn object.Object, args []object.Object) object.Object {

@@ -81,7 +81,7 @@ func main() {
 	}
 
 	evaluated := evaluator.Eval(program, env)
-	if evaluated != nil {
+	if evaluated != nil && evaluated.Type() != object.VOID_OBJ {
 		io.WriteString(os.Stdout, evaluated.Inspect()+"\n")
 	}
 
