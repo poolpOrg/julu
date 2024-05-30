@@ -309,7 +309,15 @@ func evalMatchExpression(ie *ast.MatchExpression, env *object.Environment) objec
 			if isError(caseCondition) {
 				return caseCondition
 			}
-			if isEqual(condition, caseCondition) {
+			if caseCondition.Type() == condition.Type() {
+				if isEqual(condition, caseCondition) {
+					return Eval(match.Consequence, env)
+				}
+			} else if caseCondition.Type() == object.BOOLEAN_OBJ {
+				if isTruthy(caseCondition) {
+					return Eval(match.Consequence, env)
+				}
+			} else if isTruthy(caseCondition) {
 				return Eval(match.Consequence, env)
 			}
 		}
