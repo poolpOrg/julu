@@ -312,8 +312,12 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	block := ast.NewBlockStatement(p.curToken)
-
 	p.nextToken()
+
+	if block.Token.Type == lexer.ARROW {
+		block.Statements = append(block.Statements, &ast.ExpressionStatement{Expression: p.parseExpression(LOWEST)})
+		return block
+	}
 
 	for !p.curTokenIs(lexer.RIGHT_CURLY_BRACKET) {
 		stmt := p.parseStatement()
@@ -329,15 +333,20 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 func (p *Parser) parseFunctionLiteral() ast.Expression {
 	expression := ast.NewFunctionLiteral(p.curToken)
 
-	if !p.expectPeek(lexer.LEFT_PARENTHESIS) {
-		return nil
+	if p.peekTokenIs(lexer.IDENTIFIER) {
+		p.nextToken()
+		expression.Name = ast.NewIdentifier(p.curToken)
 	}
 
-	expression.Parameters = p.parseFunctionParameters()
+	if p.peekTokenIs(lexer.LEFT_PARENTHESIS) {
+		p.nextToken()
+		expression.Parameters = p.parseFunctionParameters()
+	}
 
-	if !p.expectPeek(lexer.LEFT_CURLY_BRACKET) {
+	if !p.peekTokenIs(lexer.ARROW) && !p.peekTokenIs(lexer.LEFT_CURLY_BRACKET) {
 		return nil
 	}
+	p.nextToken()
 
 	expression.Body = p.parseBlockStatement()
 

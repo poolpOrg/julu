@@ -193,6 +193,7 @@ func (n *IfExpression) Inspect(level int) string {
 
 type FunctionLiteral struct {
 	Token      lexer.Token // The 'fn' token
+	Name       *Identifier
 	Parameters []*Identifier
 	Body       *BlockStatement
 }
