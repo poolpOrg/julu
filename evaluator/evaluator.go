@@ -1,11 +1,14 @@
 package evaluator
 
 import (
+	"bufio"
 	"fmt"
 	"strings"
 
 	"github.com/poolpOrg/julu/ast"
+	"github.com/poolpOrg/julu/lexer"
 	"github.com/poolpOrg/julu/object"
+	"github.com/poolpOrg/julu/parser"
 )
 
 var (
@@ -89,6 +92,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.StringLiteral:
 		return &object.String{Value: node.Value}
 
+	case *ast.FStringLiteral:
+		return evalFStringLiteral(node, env)
+
 	case *ast.ArrayLiteral:
 		elements := evalExpressions(node.Elements, env)
 		if len(elements) == 1 && isError(elements[0]) {
@@ -110,6 +116,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return evalIndexExpression(left, index)
 
+	default:
+		return newError("unknown node type: %T", node)
 	}
 	return nil
 }
@@ -399,6 +407,69 @@ func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Obje
 		pairs[hashed] = object.HashPair{Key: key, Value: value}
 	}
 	return &object.Hash{Pairs: pairs}
+}
+
+/*
+func substituteString(str string) (string, error) {
+	start := 0
+	for {
+		start = strings.Index(str[start:], "{")
+		if start == -1 {
+			break
+		}
+		end := strings.Index(str[start:], "}")
+		if end == -1 {
+			return "", errors.New("unmatched '{' found in the string")
+		}
+
+		placeholder := str[start+1 : start+end]
+		value, err := Eval(placeholder)
+		if err != nil {
+			return "", err
+		}
+
+		str = str[:start] + value + str[start+end+1:]
+		start += len(value) // Update start to continue after the replaced value
+	}
+
+	return str, nil
+}
+*/
+
+func evalFStringLiteral(node *ast.FStringLiteral, env *object.Environment) object.Object {
+	newEnv := object.NewEnclosedEnvironment(env)
+
+	strCopy := node.Value
+	start := 0
+	for {
+		openBrace := strings.Index(strCopy[start:], "{")
+		if openBrace == -1 {
+			break
+		}
+		openBrace += start
+		closeBrace := strings.Index(strCopy[openBrace:], "}")
+		if closeBrace == -1 {
+			return newError("unmatched '{' found in the string")
+		}
+		closeBrace += openBrace
+
+		placeholder := strCopy[openBrace+1 : closeBrace]
+		p := parser.New(lexer.New(bufio.NewReader(strings.NewReader(placeholder))))
+		x := p.Parse()
+		if len(p.Errors()) > 0 {
+			return newError("error parsing placeholder: %s", p.Errors())
+		}
+
+		value := Eval(x, newEnv)
+		if isError(value) {
+			return value
+		}
+
+		strCopy = strCopy[:openBrace] + value.Inspect() + strCopy[closeBrace+1:]
+		start = openBrace + len(value.Inspect())
+	}
+
+	return &object.String{Value: strCopy}
 }
 
 func applyFunction(fn object.Object, args []object.Object) object.Object {
