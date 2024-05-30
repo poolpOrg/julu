@@ -72,8 +72,17 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return &object.ReturnValue{Value: val}
 
+	case *ast.DoneStatement:
+		return &object.ReturnValue{Value: VOID}
+
 	case *ast.FunctionLiteral:
-		return &object.Function{Parameters: node.Parameters, Body: node.Body, Env: env}
+		if node.Name != nil {
+			funcObj := &object.Function{Name: node.Name, Parameters: node.Parameters, Body: node.Body, Env: env}
+			env.Set(node.Name.Value, funcObj)
+			return funcObj
+		} else {
+			return &object.Function{Parameters: node.Parameters, Body: node.Body, Env: env}
+		}
 
 	case *ast.CallExpression:
 		fn := Eval(node.Function, env)
@@ -134,6 +143,19 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return newError("unknown node type: %T", node)
 	}
 	return nil
+}
+
+func EvalFunctionObject(fn object.Object, env *object.Environment) object.Object {
+	if fn.Type() != object.FUNCTION_OBJ {
+		return newError("not a function: %s", fn.Type())
+	}
+
+	fn = fn.(*object.Function)
+	//args := evalExpressions(fn.Parameters, env)
+	//if len(args) == 1 && isError(args[0]) {
+	//	return args[0]
+	//}
+	return applyFunction(fn, []object.Object{})
 }
 
 func nativeBoolToBooleanObject(input bool) *object.Boolean {
@@ -531,6 +553,9 @@ func evalLoopStatement(loop *ast.LoopStatement, env *object.Environment) object.
 				if stmtResult.Type() == object.CONTINUE_OBJ {
 					shouldContinue = true
 					break
+				}
+				if stmtResult.Type() == object.RETURN_VALUE_OBJ {
+					return stmtResult
 				}
 			}
 		}

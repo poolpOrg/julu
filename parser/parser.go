@@ -150,6 +150,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case lexer.LET:
 		ret = p.parseLetStatement()
+	case lexer.DONE:
+		ret = p.parseDoneStatement()
 	case lexer.RETURN:
 		ret = p.parseReturnStatement()
 	case lexer.BREAK:
@@ -187,6 +189,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	stmt := ast.NewReturnStatement(p.curToken)
+
 	p.nextToken()
 
 	stmt.ReturnValue = p.parseExpression(LOWEST)
@@ -199,6 +202,10 @@ func (p *Parser) parseBreakStatement() *ast.BreakStatement {
 
 func (p *Parser) parseContinueStatement() *ast.ContinueStatement {
 	return ast.NewContinueStatement(p.curToken)
+}
+
+func (p *Parser) parseDoneStatement() *ast.DoneStatement {
+	return ast.NewDoneStatement(p.curToken)
 }
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {

@@ -214,3 +214,25 @@ func (n *ContinueStatement) Inspect(level int) string {
 	out += fmt.Sprintf("%s%T\n", strings.Repeat(" ", level*2), n)
 	return out
 }
+
+type DoneStatement struct {
+	Token lexer.Token // the token.BREAK token
+}
+
+func NewDoneStatement(token lexer.Token) *DoneStatement {
+	return &DoneStatement{
+		Token: token,
+	}
+}
+func (n *DoneStatement) statementNode() {}
+func (n *DoneStatement) TokenLiteral() string {
+	return n.Token.Literal
+}
+func (n *DoneStatement) String() string {
+	return n.Token.Literal
+}
+func (n *DoneStatement) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T\n", strings.Repeat(" ", level*2), n)
+	return out
+}

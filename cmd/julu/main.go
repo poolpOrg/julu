@@ -81,10 +81,22 @@ func main() {
 	}
 
 	evaluated := evaluator.Eval(program, env)
-	if evaluated != nil && evaluated.Type() != object.VOID_OBJ {
-		io.WriteString(os.Stdout, evaluated.Inspect()+"\n")
+	if entryPoint, ok := env.Get("main"); ok {
+		evaluated = evaluator.EvalFunctionObject(entryPoint, env)
 	}
 
+	if evaluated != nil {
+		if evaluated.Type() == object.VOID_OBJ {
+			os.Exit(0)
+		}
+		if evaluated.Type() == object.INTEGER_OBJ {
+			os.Exit(int(evaluated.(*object.Integer).Value))
+		}
+		if evaluated.Type() == object.ERROR_OBJ {
+			fmt.Fprintf(os.Stderr, "error: %s\n", evaluated.Inspect())
+			os.Exit(1)
+		}
+	}
 }
 
 func printParserErrors(out io.Writer, errors []string) {

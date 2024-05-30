@@ -23,6 +23,7 @@ const (
 	HASH_OBJ         = "HASH"
 	CONTINUE_OBJ     = "CONTINUE"
 	BREAK_OBJ        = "BREAK"
+	DONE_OBJ         = "DONE"
 )
 
 type HashKey struct {
@@ -98,6 +99,7 @@ func (e *Error) Type() ObjectType { return ERROR_OBJ }
 func (e *Error) Inspect() string  { return "ERROR: " + e.Message }
 
 type Function struct {
+	Name       *ast.Identifier
 	Parameters []*ast.Identifier
 	Body       *ast.BlockStatement
 	Env        *Environment
@@ -105,8 +107,13 @@ type Function struct {
 
 func (f *Function) Type() ObjectType { return FUNCTION_OBJ }
 func (f *Function) Inspect() string {
-	return fmt.Sprintf("fn(%s) {\n%s\n}",
-		f.Parameters, f.Body.String())
+	if f.Name != nil {
+		return fmt.Sprintf("fn %s(%s) {\n%s\n}",
+			f.Name.String(), f.Parameters, f.Body.String())
+	} else {
+		return fmt.Sprintf("fn(%s) {\n%s\n}",
+			f.Parameters, f.Body.String())
+	}
 }
 
 type BuiltinFunction func(args ...Object) Object
@@ -159,3 +166,8 @@ type Continue struct{}
 
 func (c *Continue) Type() ObjectType { return CONTINUE_OBJ }
 func (c *Continue) Inspect() string  { return "continue" }
+
+type Done struct{}
+
+func (d *Done) Type() ObjectType { return DONE_OBJ }
+func (d *Done) Inspect() string  { return "done" }
