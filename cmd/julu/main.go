@@ -16,6 +16,8 @@ import (
 )
 
 func main() {
+	var opt_mode string
+	flag.StringVar(&opt_mode, "mode", "", "mode to run the interpreter in")
 	flag.Parse()
 
 	if term.IsTerminal(int(os.Stdin.Fd())) && flag.NArg() == 0 {
@@ -32,15 +34,44 @@ func main() {
 		}
 	}
 
+	if opt_mode == "lexer" {
+		l := lexer.New(bufio.NewReader(input))
+		for tok := l.Lex(); tok.Type != lexer.EOF; tok = l.Lex() {
+			switch tok.Type {
+			case lexer.STRING, lexer.FSTRING, lexer.IDENTIFIER:
+				fmt.Printf("[%d:%d] %s => %s\n",
+					tok.Position().Line(), tok.Position().Column(), tok.Type, tok.Literal)
+			default:
+				fmt.Printf("[%d:%d] %s\n",
+					tok.Position().Line(), tok.Position().Column(), tok.Type)
+			}
+		}
+		os.Exit(0)
+	}
+
+	if opt_mode == "parser" {
+		l := lexer.New(bufio.NewReader(input))
+		p := parser.New(l)
+		program := p.Parse()
+		if p.Errors() != nil {
+			printParserErrors(os.Stderr, p.Errors())
+		}
+		fmt.Println(program.Inspect())
+		os.Exit(0)
+	}
+
 	l := lexer.New(bufio.NewReader(input))
 	env := object.NewEnvironment()
 	p := parser.New(l)
-
-	if len(p.Errors()) > 0 {
+	program := p.Parse()
+	if program == nil {
+		os.Exit(1)
+	}
+	if p.Errors() != nil {
 		printParserErrors(os.Stderr, p.Errors())
 	}
 
-	evaluated := evaluator.Eval(p.Parse(), env)
+	evaluated := evaluator.Eval(program, env)
 	if evaluated != nil {
 		io.WriteString(os.Stdout, evaluated.Inspect()+"\n")
 	}

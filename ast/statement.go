@@ -1,10 +1,16 @@
 package ast
 
-import "github.com/poolpOrg/julu/lexer"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/poolpOrg/julu/lexer"
+)
 
 type Statement interface {
 	Node
 	statementNode()
+	Inspect(level int) string
 }
 
 type LetStatement struct {
@@ -25,6 +31,12 @@ func (n *LetStatement) TokenLiteral() string {
 func (n *LetStatement) String() string {
 	return n.Token.Literal + " " + n.Name.String() + " = " + n.Value.String() + ";"
 }
+func (n *LetStatement) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T: Name=%s\n", strings.Repeat(" ", level*2), n, n.Name.String())
+	out += n.Value.Inspect(level + 1)
+	return out
+}
 
 type ReturnStatement struct {
 	Token       lexer.Token // the token.RETURN token
@@ -42,6 +54,12 @@ func (n *ReturnStatement) TokenLiteral() string {
 }
 func (n *ReturnStatement) String() string {
 	return n.Token.Literal + " " + n.ReturnValue.String() + ";"
+}
+func (n *ReturnStatement) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T\n", strings.Repeat(" ", level*2), n)
+	out += n.ReturnValue.Inspect(level + 1)
+	return out
 }
 
 type ExpressionStatement struct {
@@ -63,6 +81,14 @@ func (n *ExpressionStatement) String() string {
 		return n.Expression.String()
 	}
 	return ""
+}
+func (n *ExpressionStatement) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T: %s\n", strings.Repeat(" ", level*2), n, n.TokenLiteral())
+	if n.Expression != nil {
+		out += n.Expression.Inspect(level + 1)
+	}
+	return out
 }
 
 type BlockStatement struct {
@@ -93,6 +119,14 @@ func (n *BlockStatement) String() string {
 
 	if len(n.Statements) != 1 {
 		out += " }"
+	}
+	return out
+}
+func (n *BlockStatement) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T\n", strings.Repeat(" ", level*2), n)
+	for _, s := range n.Statements {
+		out += s.Inspect(level + 1)
 	}
 	return out
 }

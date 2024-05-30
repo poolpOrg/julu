@@ -1,10 +1,16 @@
 package ast
 
-import "github.com/poolpOrg/julu/lexer"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/poolpOrg/julu/lexer"
+)
 
 type Expression interface {
 	Node
 	expressionNode()
+	Inspect(level int) string
 }
 
 type Identifier struct {
@@ -26,6 +32,9 @@ func (n *Identifier) TokenLiteral() string {
 func (n *Identifier) String() string {
 	return n.Value
 }
+func (n *Identifier) Inspect(level int) string {
+	return fmt.Sprintf("%s%T: Name=%s\n", strings.Repeat(" ", level*2), n, n.String())
+}
 
 type IntegerLiteral struct {
 	Token lexer.Token // the token.INT token
@@ -44,6 +53,9 @@ func (n *IntegerLiteral) TokenLiteral() string {
 }
 func (n *IntegerLiteral) String() string {
 	return n.Token.Literal
+}
+func (n *IntegerLiteral) Inspect(level int) string {
+	return fmt.Sprintf("%s%T: %s\n", strings.Repeat(" ", level*2), n, n.String())
 }
 
 type PrefixExpression struct {
@@ -64,6 +76,12 @@ func (n *PrefixExpression) TokenLiteral() string {
 }
 func (n *PrefixExpression) String() string {
 	return "(" + n.Operator + n.Right.String() + ")"
+}
+func (n *PrefixExpression) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T: %s\n", strings.Repeat(" ", level*2), n, n.TokenLiteral())
+	out += n.Right.Inspect(level + 1)
+	return out
 }
 
 type InfixExpression struct {
@@ -87,6 +105,13 @@ func (n *InfixExpression) TokenLiteral() string {
 func (n *InfixExpression) String() string {
 	return "(" + n.Left.String() + " " + n.Operator + " " + n.Right.String() + ")"
 }
+func (n *InfixExpression) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T: %s\n", strings.Repeat(" ", level*2), n, n.TokenLiteral())
+	out += n.Left.Inspect(level + 1)
+	out += n.Right.Inspect(level + 1)
+	return out
+}
 
 type Boolean struct {
 	Token lexer.Token
@@ -106,6 +131,9 @@ func (n *Boolean) TokenLiteral() string {
 func (n *Boolean) String() string {
 	return n.Token.Literal
 }
+func (n *Boolean) Inspect(level int) string {
+	return fmt.Sprintf("%s%T: %s\n", strings.Repeat(" ", level*2), n, n.String())
+}
 
 type Null struct {
 	Token lexer.Token
@@ -122,6 +150,9 @@ func (n *Null) TokenLiteral() string {
 }
 func (n *Null) String() string {
 	return "null"
+}
+func (n *Null) Inspect(level int) string {
+	return fmt.Sprintf("%s%T: %s\n", strings.Repeat(" ", level*2), n, n.String())
 }
 
 type IfExpression struct {
@@ -144,6 +175,18 @@ func (n *IfExpression) String() string {
 	out := "if " + n.Condition.String() + " " + n.Consequence.String()
 	if n.Alternative != nil {
 		out += " else " + n.Alternative.String()
+	}
+	return out
+}
+func (n *IfExpression) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T\n", strings.Repeat(" ", level*2), n)
+	out += n.Condition.Inspect(level + 1)
+	if n.Consequence != nil {
+		out += n.Consequence.Inspect(level + 1)
+	}
+	if n.Alternative != nil {
+		out += n.Alternative.Inspect(level + 1)
 	}
 	return out
 }
@@ -170,11 +213,17 @@ func (n *FunctionLiteral) String() string {
 	}
 	return n.Token.Literal + "(" + "..." + ") " + n.Body.String()
 }
+func (n *FunctionLiteral) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T: Parameters=%s\n", strings.Repeat(" ", level*2), n, n.Parameters)
+	out += n.Body.Inspect(level + 1)
+	return out
+}
 
 type CallExpression struct {
-	Token     lexer.Token // The '(' token
-	Function  Expression  // Identifier or FunctionLiteral
-	Arguments []Expression
+	Token      lexer.Token // The '(' token
+	Function   Expression  // Identifier or FunctionLiteral
+	Parameters []Expression
 }
 
 func NewCallExpression(token lexer.Token, function Expression) *CallExpression {
@@ -189,10 +238,15 @@ func (n *CallExpression) TokenLiteral() string {
 }
 func (n *CallExpression) String() string {
 	args := []string{}
-	for _, a := range n.Arguments {
+	for _, a := range n.Parameters {
 		args = append(args, a.String())
 	}
 	return n.Function.String() + "(" + n.Token.Literal + ")"
+}
+func (n *CallExpression) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T: Function=%s, Parameters=%s\n", strings.Repeat(" ", level*2), n, n.Function.String(), n.Parameters)
+	return out
 }
 
 type StringLiteral struct {
@@ -213,6 +267,9 @@ func (n *StringLiteral) TokenLiteral() string {
 func (n *StringLiteral) String() string {
 	return "\"" + n.Token.Literal + "\""
 }
+func (n *StringLiteral) Inspect(level int) string {
+	return fmt.Sprintf("%s%T: %s\n", strings.Repeat(" ", level*2), n, n.String())
+}
 
 type FStringLiteral struct {
 	Token lexer.Token
@@ -231,6 +288,9 @@ func (n *FStringLiteral) TokenLiteral() string {
 }
 func (n *FStringLiteral) String() string {
 	return "f\"" + n.Token.Literal + "\""
+}
+func (n *FStringLiteral) Inspect(level int) string {
+	return fmt.Sprintf("%s%T: %s\n", strings.Repeat(" ", level*2), n, n.String())
 }
 
 type ArrayLiteral struct {
@@ -254,6 +314,9 @@ func (n *ArrayLiteral) String() string {
 	}
 	return "[" + "..." + "]"
 }
+func (n *ArrayLiteral) Inspect(level int) string {
+	return fmt.Sprintf("%s%T: %s\n", strings.Repeat(" ", level*2), n, n.String())
+}
 
 type IndexExpression struct {
 	Token lexer.Token // The '[' token
@@ -273,6 +336,9 @@ func (n *IndexExpression) TokenLiteral() string {
 }
 func (n *IndexExpression) String() string {
 	return "(" + n.Left.String() + "[" + n.Index.String() + "])"
+}
+func (n *IndexExpression) Inspect(level int) string {
+	return fmt.Sprintf("%s%T: %s\n", strings.Repeat(" ", level*2), n, n.String())
 }
 
 type HashLiteral struct {
@@ -295,4 +361,7 @@ func (n *HashLiteral) String() string {
 	//	pairs = append(pairs, key.String()+":"+value.String())
 	//}
 	return "{" + "..." + "}"
+}
+func (n *HashLiteral) Inspect(level int) string {
+	return fmt.Sprintf("%s%T: %s\n", strings.Repeat(" ", level*2), n, n.String())
 }

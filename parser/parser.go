@@ -23,6 +23,8 @@ type Parser struct {
 
 	prefixParseFns map[lexer.TokenType]prefixParseFn
 	infixParseFns  map[lexer.TokenType]infixParseFn
+
+	entryPoint ast.Expression
 }
 
 func New(l *lexer.Lexer) *Parser {
@@ -371,11 +373,11 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	expression := ast.NewCallExpression(p.curToken, function)
-	expression.Arguments = p.parseCallArguments()
+	expression.Parameters = p.parseCallParameters()
 	return expression
 }
 
-func (p *Parser) parseCallArguments() []ast.Expression {
+func (p *Parser) parseCallParameters() []ast.Expression {
 	args := []ast.Expression{}
 
 	if p.peekTokenIs(lexer.RIGHT_PARENTHESIS) {
