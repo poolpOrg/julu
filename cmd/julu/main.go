@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
 	"io"
@@ -49,7 +50,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	if opt_mode == "parser" {
+	if opt_mode == "ast" {
 		l := lexer.New(bufio.NewReader(input))
 		p := parser.New(l)
 		program := p.Parse()
@@ -60,13 +61,21 @@ func main() {
 		os.Exit(0)
 	}
 
-	l := lexer.New(bufio.NewReader(input))
 	env := object.NewEnvironment()
+
+	code, err := io.ReadAll(input)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not read input: %s\n", err)
+		os.Exit(1)
+	}
+
+	l := lexer.New(bufio.NewReader(bytes.NewReader(code)))
 	p := parser.New(l)
 	program := p.Parse()
 	if program == nil {
 		os.Exit(1)
 	}
+
 	if p.Errors() != nil {
 		printParserErrors(os.Stderr, p.Errors())
 	}

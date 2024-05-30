@@ -190,7 +190,7 @@ with open() as fp => fp.write("foobar")
 
 ## Operators
 
-- All C operators
+- All C operators: +, -, *, +, %, ~, &, |, <<, >>
 - Circular shift: <<< and >>>
 - Power: **
 - Logical operators: &&, ||, ! can also be written as and, or, not

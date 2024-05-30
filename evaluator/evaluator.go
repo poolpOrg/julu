@@ -155,10 +155,6 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
 
 func evalInfixExpression(operator string, left, right object.Object) object.Object {
 	switch {
-	case operator == "==", operator == "is":
-		return nativeBoolToBooleanObject(left == right)
-	case operator == "!=":
-		return nativeBoolToBooleanObject(left != right)
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
 	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
@@ -287,6 +283,10 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Obje
 	}
 	if isTruthy(condition) {
 		return Eval(ie.Consequence, env)
+	}
+
+	if ie.ConditionalAlternative != nil {
+		return evalIfExpression(ie.ConditionalAlternative, env)
 	} else if ie.Alternative != nil {
 		return Eval(ie.Alternative, env)
 	} else {
