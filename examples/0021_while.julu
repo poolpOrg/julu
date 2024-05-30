@@ -1,10 +1,4 @@
 fn main {
-    loop while true {
-        println("loop");
-    }
-
-    loop while true => println("loop");
-
     while true {
         println("loop");
     }

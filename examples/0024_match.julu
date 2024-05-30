@@ -1,0 +1,6 @@
+fn main {
+    match x {
+        if x==1 => println("match")
+        if x!=1 => println("mismatch")
+    } else => println("found no match!")
+}

@@ -84,6 +84,7 @@ const (
 	// Control flow
 	IF     = "IF"
 	ELSE   = "ELSE"
+	MATCH  = "MATCH"
 	RETURN = "RETURN"
 
 	LET = "LET"
@@ -118,6 +119,7 @@ var keywords = map[string]TokenType{
 	"while": WHILE,
 	"until": UNTIL,
 	"for":   FOR,
+	"match": MATCH,
 }
 
 func LookupIdent(ident string) TokenType {

@@ -58,6 +58,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(lexer.WHILE, p.parseWhileStatement)
 	p.registerPrefix(lexer.UNTIL, p.parseUntilStatement)
 	p.registerPrefix(lexer.FOR, p.parseForStatement)
+	p.registerPrefix(lexer.MATCH, p.parseMatchExpression)
 
 	p.registerInfix(lexer.ADD, p.parseInfixExpression)
 	p.registerInfix(lexer.SUB, p.parseInfixExpression)
@@ -496,19 +497,6 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 }
 
 func (p *Parser) parseLoopStatement() ast.Expression {
-	if p.peekTokenIs(lexer.UNTIL) {
-		p.nextToken()
-		return p.parseUntilStatement()
-	}
-	if p.peekTokenIs(lexer.WHILE) {
-		p.nextToken()
-		return p.parseWhileStatement()
-	}
-	if p.peekTokenIs(lexer.FOR) {
-		p.nextToken()
-		return p.parseForStatement()
-	}
-
 	stmt := ast.NewLoopStatement(p.curToken)
 
 	if !p.peekTokenIs(lexer.ARROW) && !p.peekTokenIs(lexer.LEFT_CURLY_BRACKET) {
@@ -575,4 +563,74 @@ func (p *Parser) parseForStatement() ast.Expression {
 	stmt.Body = p.parseBlockStatement()
 
 	return stmt
+}
+
+func (p *Parser) parseMatchExpression() ast.Expression {
+	expression := ast.NewMatchExpression(p.curToken)
+
+	p.nextToken()
+	expression.Condition = p.parseExpression(LOWEST)
+
+	if !p.peekTokenIs(lexer.LEFT_CURLY_BRACKET) && !p.peekTokenIs(lexer.ARROW) {
+		return nil
+	}
+	p.nextToken()
+
+	expression.MatchBlock = p.parseMatchBlockStatement()
+
+	for !p.curTokenIs(lexer.RIGHT_CURLY_BRACKET) {
+		p.nextToken()
+	}
+
+	if p.peekTokenIs(lexer.ELSE) {
+		p.nextToken()
+		if !p.peekTokenIs(lexer.LEFT_CURLY_BRACKET) && !p.peekTokenIs(lexer.ARROW) {
+			return nil
+		}
+		p.nextToken()
+		expression.Alternative = p.parseBlockStatement()
+	}
+
+	return expression
+}
+
+func (p *Parser) parseMatchBlockStatement() *ast.MatchBlockStatement {
+	block := ast.NewMatchBlockStatement(p.curToken)
+	p.nextToken()
+
+	if block.Token.Type == lexer.ARROW {
+		stmt := p.parseIfExpression()
+		if stmt == nil {
+			p.pushError("expected if expression")
+			return nil
+		}
+
+		if stmt, ok := stmt.(*ast.IfExpression); !ok {
+			p.pushError("expected if expression")
+			return nil
+		} else {
+			block.Cases = append(block.Cases, *stmt)
+		}
+
+		return block
+	}
+
+	for !p.curTokenIs(lexer.RIGHT_CURLY_BRACKET) {
+		stmt := p.parseIfExpression()
+		if stmt == nil {
+			p.pushError("expected if expression")
+			return nil
+		}
+
+		if stmt, ok := stmt.(*ast.IfExpression); !ok {
+			p.pushError("expected if expression")
+			return nil
+		} else {
+			block.Cases = append(block.Cases, *stmt)
+		}
+
+		p.nextToken()
+	}
+
+	return block
 }

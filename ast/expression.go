@@ -447,3 +447,44 @@ func (n *ForStatement) Inspect(level int) string {
 	}
 	return out
 }
+
+type MatchExpression struct {
+	Token       lexer.Token // The 'if' token
+	Condition   Expression
+	MatchBlock  *MatchBlockStatement
+	Alternative *BlockStatement
+}
+
+func NewMatchExpression(token lexer.Token) *MatchExpression {
+	return &MatchExpression{
+		Token: token,
+	}
+}
+func (n *MatchExpression) expressionNode() {}
+func (n *MatchExpression) TokenLiteral() string {
+	return n.Token.Literal
+}
+func (n *MatchExpression) String() string {
+	out := "match " + n.Condition.String() + " "
+	if n.Alternative != nil {
+		out += " else " + n.Alternative.String()
+	}
+	return out
+}
+func (n *MatchExpression) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T\n", strings.Repeat(" ", level*2), n)
+	out += strings.Repeat(" ", (level+1)*2) + "Condition:\n"
+	out += n.Condition.Inspect(level + 2)
+
+	if n.MatchBlock != nil {
+		out += strings.Repeat(" ", (level+1)*2) + "MatchBlock:\n"
+		out += n.MatchBlock.Inspect(level + 2)
+	}
+
+	if n.Alternative != nil {
+		out += strings.Repeat(" ", (level+1)*2) + "Alternative:\n"
+		out += n.Alternative.Inspect(level + 2)
+	}
+	return out
+}

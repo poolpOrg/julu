@@ -130,3 +130,43 @@ func (n *BlockStatement) Inspect(level int) string {
 	}
 	return out
 }
+
+type MatchBlockStatement struct {
+	Token lexer.Token // the { token
+	Cases []IfExpression
+}
+
+func NewMatchBlockStatement(token lexer.Token) *MatchBlockStatement {
+	return &MatchBlockStatement{
+		Token: token,
+	}
+}
+func (n *MatchBlockStatement) statementNode() {}
+func (n *MatchBlockStatement) TokenLiteral() string {
+	return n.Token.Literal
+}
+func (n *MatchBlockStatement) String() string {
+	var out string
+
+	if len(n.Cases) == 1 {
+		out += "=> "
+	} else {
+		out += "{ "
+	}
+	for _, s := range n.Cases {
+		out += s.String()
+	}
+
+	if len(n.Cases) != 1 {
+		out += " }"
+	}
+	return out
+}
+func (n *MatchBlockStatement) Inspect(level int) string {
+	var out string
+	out += fmt.Sprintf("%s%T\n", strings.Repeat(" ", level*2), n)
+	for _, s := range n.Cases {
+		out += s.Inspect(level + 1)
+	}
+	return out
+}

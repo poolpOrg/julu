@@ -1,10 +1,4 @@
 fn main {
-    loop until true {
-        println("loop");
-    }
-
-    loop until true => println("loop");
-
     until true {
         println("loop");
     }

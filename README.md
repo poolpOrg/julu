@@ -1,5 +1,10 @@
 # JuLu Programming Language Specification
 
+
+**WARNING:**
+**THIS IS A WORK IN PROGRESS, IT DOES NOT WORK, DO NOT BOTHER BUILDING.**
+
+
 ## Overview
 
 JuLu is a programming language designed for a short learning curve,
@@ -11,19 +16,12 @@ crafting structures,
 and memory layout management.
 
 
-## Syntax
+## "Hello world !"
+```go
+package main
 
-```
 fn main => println("Hello world !")
-
-// Alternatively
-fn main() {
-    println("Hello world !")
-}
 ```
-
-Parentheses are optional when there are no parameters,
-and `=>` indicates a block with a single expression.
 
 
 ## Types
@@ -52,21 +50,122 @@ and `=>` indicates a block with a single expression.
 ## Functions
 Support for returning multiple values matching a return signature
 
+```go
+fn foobar(x : int, y : int) -> (int) {
+    return x+y
+}
 
-## Loops
-
-- for i in range { }
-- loop { }
-- loop condition { }
+fn foobar(x : int, y : int) -> (int, int) {
+    return x, y
+}
+```
 
 
 ## Conditionals
 
-- switch case
-- if
-- else if
-- else
+- if / else if / else
+```go
+// long form for conditional code blocks
+if true {
+    println("do this !")
+}
 
+if x {
+    println("do this !")
+} else if y {
+    println("or that !")
+}
+
+if x {
+    println("do this !")
+} else if y {
+    println("or that !")
+} else {
+    println("or even that !")
+}
+
+// short form for single expression / statements
+if true => println("only do this !")
+
+if x => println("only do this !")
+else if y => println("don't do that !")
+
+if x => println("x!")
+else if y => println("y!")
+else => println("z!")
+
+
+// long and short forms can be mixed:
+if !ok => return -1
+else => {
+    println("yeah !")
+    return 0
+}
+
+if ok => {
+    println("yeah !")
+    return 0
+} else => return -1
+```
+
+
+
+- match:
+```go
+match x {
+    case x==1 => println("match")
+    case x!=1 => println("mismatch")
+} else => println("found no match!")
+
+match x {
+    case x==1 {
+        println("match")
+    }
+    case x!=1 {
+        println("mismatch")
+    }
+} else => println("found no match!")
+
+
+```
+
+## Loops
+
+- loop:
+```go
+loop {
+    println("infinite loop")
+}
+```
+
+- while:
+```go
+x = 0
+while x < 42 {
+    println("loop while x < 42")
+    x++
+}
+```
+
+
+- until:
+```go
+x = 42
+until x > 42 {
+    println("loop until x > 42")
+    x++
+}
+```
+
+- for x in y {}
+```go
+for x in [1, 2, 3, 4] => println(x * 2)
+
+for x in [1, 2, 3, 4] {
+    println(x * 2)
+    println(x << 1)
+}
+```
 
 ## Concurrency
 
