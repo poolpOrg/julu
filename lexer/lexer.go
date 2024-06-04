@@ -99,6 +99,18 @@ const (
 	BREAK    = "BREAK"
 	CONTINUE = "CONTINUE"
 	DONE     = "DONE"
+
+	AS      = "AS"
+	INT8    = "INT8"
+	INT16   = "INT16"
+	INT32   = "INT32"
+	INT64   = "INT64"
+	UINT8   = "UINT8"
+	UINT16  = "UINT16"
+	UINT32  = "UINT32"
+	UINT64  = "UINT64"
+	FLOAT32 = "FLOAT32"
+	FLOAT64 = "FLOAT64"
 )
 
 var keywords = map[string]TokenType{
@@ -128,6 +140,18 @@ var keywords = map[string]TokenType{
 	"break":    BREAK,
 	"continue": CONTINUE,
 	"done":     DONE,
+
+	"as":      AS,
+	"int8":    INT8,
+	"int16":   INT16,
+	"int32":   INT32,
+	"int64":   INT64,
+	"uint8":   UINT8,
+	"uint16":  UINT16,
+	"uint32":  UINT32,
+	"uint64":  UINT64,
+	"float32": FLOAT32,
+	"float64": FLOAT64,
 }
 
 func LookupIdent(ident string) TokenType {

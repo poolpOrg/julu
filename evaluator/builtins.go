@@ -8,6 +8,10 @@ import (
 )
 
 var builtins = map[string]*object.Builtin{
+	"type": {
+		Fn: builtin_type,
+	},
+
 	"len": {
 		Fn: builtin_len,
 	},
@@ -19,6 +23,13 @@ var builtins = map[string]*object.Builtin{
 	"sleep": {
 		Fn: builtin_sleep,
 	},
+}
+
+func builtin_type(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return &object.Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+	}
+	return &object.String{Value: string(args[0].Type())}
 }
 
 func builtin_len(args ...object.Object) object.Object {

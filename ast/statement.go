@@ -16,6 +16,7 @@ type Statement interface {
 type LetStatement struct {
 	Token lexer.Token // the token.LET token
 	Name  *Identifier
+	Type  *Identifier
 	Value Expression
 }
 

@@ -7,6 +7,7 @@ import (
 const (
 	_ int = iota
 	LOWEST
+	CAST
 	EQUALS      // ==
 	LESSGREATER // > or <
 	COMPARISON  // &&, ||
@@ -20,6 +21,7 @@ const (
 )
 
 var precedences = map[lexer.TokenType]int{
+	lexer.COLON:            CAST,
 	lexer.EQUALS:           EQUALS,
 	lexer.NOT_EQUALS:       EQUALS,
 	lexer.LESSER_THAN:      LESSGREATER,

@@ -41,6 +41,7 @@ func New(l *lexer.Lexer) *Parser {
 
 	p.registerPrefix(lexer.IDENTIFIER, p.parseIdentifier)
 	p.registerPrefix(lexer.INTEGER, p.parseIntegerLiteral)
+	p.registerPrefix(lexer.FLOAT, p.parseFloatLiteral)
 	p.registerPrefix(lexer.STRING, p.parseStringLiteral)
 	p.registerPrefix(lexer.NULL, p.parseNull)
 	p.registerPrefix(lexer.FSTRING, p.parseFStringLiteral)
@@ -60,6 +61,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(lexer.FOR, p.parseForStatement)
 	p.registerPrefix(lexer.MATCH, p.parseMatchExpression)
 
+	p.registerInfix(lexer.AS, p.parseInfixExpression)
 	p.registerInfix(lexer.ADD, p.parseInfixExpression)
 	p.registerInfix(lexer.SUB, p.parseInfixExpression)
 	p.registerInfix(lexer.MUL, p.parseInfixExpression)
@@ -177,6 +179,12 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	}
 	stmt.Name = ast.NewIdentifier(p.curToken)
 
+	if p.peekTokenIs(lexer.COLON) {
+		p.nextToken()
+		p.nextToken()
+		stmt.Type = ast.NewIdentifier(p.curToken)
+	}
+
 	if !p.expectPeek(lexer.ASSIGN) {
 		return nil
 	}
@@ -261,7 +269,31 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 		p.pushError(fmt.Sprintf("could not parse %q as integer", p.curToken.Literal))
 		return nil
 	}
-	return ast.NewIntegerLiteral(p.curToken, value)
+	expr := ast.NewIntegerLiteral(p.curToken, value)
+
+	if p.peekToken.Type == lexer.COLON {
+		p.nextToken()
+		p.nextToken()
+		expr.Cast = ast.NewIdentifier(p.curToken)
+	}
+	return expr
+}
+
+func (p *Parser) parseFloatLiteral() ast.Expression {
+	value, err := strconv.ParseFloat(p.curToken.Literal, 64)
+	if err != nil {
+		p.pushError(fmt.Sprintf("could not parse %q as float", p.curToken.Literal))
+		return nil
+	}
+	expr := ast.NewFloatLiteral(p.curToken, value)
+
+	if p.peekToken.Type == lexer.COLON {
+		p.nextToken()
+		p.nextToken()
+		expr.Cast = ast.NewIdentifier(p.curToken)
+	}
+	return expr
+
 }
 
 func (p *Parser) parsePrefixExpression() ast.Expression {
@@ -285,7 +317,13 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 }
 
 func (p *Parser) parseBoolean() ast.Expression {
-	return ast.NewBoolean(p.curToken, p.curTokenIs(lexer.TRUE))
+	expr := ast.NewBoolean(p.curToken, p.curTokenIs(lexer.TRUE))
+	if p.peekToken.Type == lexer.COLON {
+		p.nextToken()
+		p.nextToken()
+		expr.Cast = ast.NewIdentifier(p.curToken)
+	}
+	return expr
 }
 
 func (p *Parser) parseNull() ast.Expression {

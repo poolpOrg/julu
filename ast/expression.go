@@ -39,6 +39,7 @@ func (n *Identifier) Inspect(level int) string {
 type IntegerLiteral struct {
 	Token lexer.Token // the token.INT token
 	Value int64
+	Cast  *Identifier
 }
 
 func NewIntegerLiteral(token lexer.Token, value int64) *IntegerLiteral {
@@ -55,6 +56,29 @@ func (n *IntegerLiteral) String() string {
 	return n.Token.Literal
 }
 func (n *IntegerLiteral) Inspect(level int) string {
+	return fmt.Sprintf("%s%T: %s\n", strings.Repeat(" ", level*2), n, n.String())
+}
+
+type FloatLiteral struct {
+	Token lexer.Token // the token.FLOAT token
+	Value float64
+	Cast  *Identifier
+}
+
+func NewFloatLiteral(token lexer.Token, value float64) *FloatLiteral {
+	return &FloatLiteral{
+		Token: token,
+		Value: value,
+	}
+}
+func (n *FloatLiteral) expressionNode() {}
+func (n *FloatLiteral) TokenLiteral() string {
+	return n.Token.Literal
+}
+func (n *FloatLiteral) String() string {
+	return n.Token.Literal
+}
+func (n *FloatLiteral) Inspect(level int) string {
 	return fmt.Sprintf("%s%T: %s\n", strings.Repeat(" ", level*2), n, n.String())
 }
 
@@ -116,6 +140,7 @@ func (n *InfixExpression) Inspect(level int) string {
 type Boolean struct {
 	Token lexer.Token
 	Value bool
+	Cast  *Identifier
 }
 
 func NewBoolean(token lexer.Token, value bool) *Boolean {
